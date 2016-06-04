@@ -4,18 +4,64 @@ import pydub
 import fnmatch
 import os
 import shelve
+import re
 
 
-class Music_DB:
-    def __init__(self, db_name, predicate):
-        self._name = db_name
-        db = shelve.open(self._name)
-        db.close()
+class SongAlreadyExists(Exception):
+    def __init__(self):
+
+        # Call the base class constructor with the parameters it needs
+        super(SongAlreadyExists, self).__init__("Song already in db!")
+
+
+class SongNotFound(Exception):
+    def __init__(self):
+
+        # Call the base class constructor with the parameters it needs
+        super(SongNotFound, self).__init__("Song is not in db!")
+
+
+class DBNotOpen(Exception):
+    def __init__(self, db_folder):
+
+        # Call the base class constructor with the parameters it needs
+        super(SongNotFound, self).__init__(
+            "DB " +str(db_folder) + " is not open!")
+
+
+class SoundFormatNotSupported(Exception):
+    def __init__(self, format):
+
+        # Call the base class constructor with the parameters it needs
+        super(SoundFormatNotSupported, self).__init__(
+            "Sound format " +str(format) + " is not supported.")
+
+
+class Segmented_Music_DB(object):
+    def __init__(self, db_folder, frame_rate, channels, duration_seconds):
+        self._folder = db_folder
+        self._path = self._folder + "/" + "dbfile.pkl"
+        if not os.path.exists(self._folder):
+            os.makedirs(self._folder)
+
+        self._frame_rate = frame_rate
+        self._channels = channels
+        self._duration_seconds = duration_seconds
+
         self._db_instance = None
+        self.open()
+        self.close()
+
+    def open(self):
+        return self.__enter__()
+
+    def close(self):
+        self.__exit__("","","")
 
     def __enter__(self):
         if self._db_instance is None:
-            self._db_instance = shelve.open(self._name)
+            self._db_instance = shelve.open(self._path)
+        return self
 
     def __exit__(self, type, value, traceback):
         if self._db_instance is not None:
@@ -23,131 +69,81 @@ class Music_DB:
             self._db_instance = None
 
     def _open_song(self, song_file, file_format):
-        raise NotImplementedError()
+        wav_regex = re.compile("[Ww][Aa][Vv]([Ee])?")
+        mp3_regex = re.compile("[Mm][Pp]3")
+        if wav_regex.match(file_format) is not None:
+            return pydub.AudioSegment.from_wav(song_file)
+        elif mp3_regex.match(file_format) is not None:
+            return pydub.AudioSegment.from_mp3(song_file)
+        else:
+            raise SoundFormatNotSupported(file_format)
+
+    def _does_song_match(self, song):
+        return song.frame_rate == self._frame_rate and song.channels == self._channels
+
+    def _split_song(self, song):
+        offset = 0
+        duration = self._duration_seconds * 1000
+        song_segments = []
+        while offset + duration < song.duration_seconds * 1000:
+            song_segments.append(song[offset:offset + duration])
+            offset = offset + duration
+        if duration < song.duration_seconds:
+            song_segments.append(song[-duration])
+
+        return song_segments
 
     def add_song(self, song_name, song_file, file_format):
         if self._db_instance is None:
-            raise Exception("Db is not open!")
+            raise DBNotOpen(self._folder)
 
         if song_name in self._db_instance:
-            raise Exception("Song name already in db!")
+            raise SongAlreadyExists()
 
-        self._db_instance[song_name] = self._open_song(song_file, file_format)
+        song = self._open_song(song_file, file_format)
+        if not self._does_song_match(song):
+            raise Exception("Song " + song_name + "does not match db format")
+
+        song_segments = self._split_song(song)
+        self._db_instance[song_name] = song_segments
 
     def remove_song(self, song_name):
         if self._db_instance is None:
-            raise Exception("Db is not open!")
+            raise DBNotOpen(self._folder)
 
         if song_name not in self._db_instance:
-            raise Exception("Song name is not in db!")
+            raise SongNotFound()
 
+        self._db_instance[song_name] = None
         del self._db_instance[song_name]
 
-    def get_song(self, song_name):
+    def get_song_segments(self, song_name):
         if self._db_instance is None:
-            raise Exception("Db is not open!")
+            raise DBNotOpen(self._folder)
 
         if song_name not in self._db_instance:
-            raise Exception("Song name is not in db!")
+            raise SongNotFound()
 
         return self._db_instance[song_name]
-
-
-
-
-def does_song_match(song, frame_rate, channels):
-    return song.frame_rate == frame_rate and song.channels == channels
-
-
-def split_song(song, duration_in_seconds):
-    offset = 0
-    duration = duration_in_seconds * 1000
-    song_segments = []
-    while offset + duration < song.duration_seconds * 1000:
-        song_segments.append(song[offset:offset + duration])
-        offset = offset + duration
-    if duration < song.duration_seconds:
-        song_segments.append(song[-duration])
-
-    return song_segments
-
-
-def collect_file_paths(folder, file_extension_regex):
-    file_paths = []
-    for root, _, file_names in os.walk(folder):
-        for file_name in fnmatch.filter(file_names,'*.' + file_extension_regex):
-            file_paths.append(root + "/" + file_name)
-    return file_paths
-
-
-def get_mp3_songs(file_paths):
-    songs = []
-    for file_path in file_paths:
-        try:
-            songs.append(pydub.AudioSegment.from_mp3(file_path))
-        except:
-            print "Error getting file {}".format(file_path)
-            continue
-    return songs
-
-
-def get_wav_songs(file_paths):
-    songs = []
-    for file_path in file_paths:
-        try:
-            songs.append(pydub.AudioSegment.from_wav(file_path))
-        except:
-            print "Error getting file {}".format(file_path)
-            continue
-    return songs
-
-
-def collect_mp3_songs(folder):
-    return get_mp3_songs(collect_file_paths(folder, "[Mm][Pp]3"))
-
-
-def collect_wav_songs(folder):
-    return get_wav_songs(collect_file_paths(folder, "[Ww][Aa][Vv]"))
-
-
-def store_music_db(db_name, songs):
-    if not os.path.exists(db_name):
-        os.makedirs(db_name)
-
-    joblib.dump(songs, db_name + "/dbfile.pkl", compress=5)
 
 
 def main():
     FRAME_RATE = 44100
     CHANNELS = 2
 
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 3:
         print "Bad usage! usage is {} " \
-            "<music-folder-path> <duration_in_seconds>" \
-            " <music-db-name>".format(sys.argv[0])
+            "<db-folder-path> <duration_in_seconds>" \
+            "".format(sys.argv[0])
         return
 
-    music_folder = sys.argv[1]
-    duration_in_seconds = int(sys.argv[2])
-    db_name = sys.argv[3]
-
-    songs = []
-    songs += collect_mp3_songs(music_folder)
-    songs += collect_wav_songs(music_folder)
-
-    song_segments = []
-
-    for song in songs:
-        if not does_song_match(song, FRAME_RATE, CHANNELS):
-            continue
-        try:
-            song_segments += split_song(song, duration_in_seconds)
-        except:
-            print "Error in spliting song {}".format(song)
-
-    print "There were {} suitable song segments".format(len(song_segments))
-
-    store_music_db(db_name, song_segments)
+    db = Segmented_Music_DB(sys.argv[1], FRAME_RATE, CHANNELS, int(sys.argv[2]))     
+    with db.open() as opened_db:
+        print opened_db
+        opened_db.add_song("test_song","i.mp3","mp3")
+        segments = opened_db.get_song_segments("test_song")
+        print "Song was segmented to {} parts".format(len(segments))
+        opened_db.remove_song("test_song")
 
 if __name__ == "__main__":
     main()
