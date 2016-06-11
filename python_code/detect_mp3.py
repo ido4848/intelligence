@@ -4,48 +4,44 @@ import numpy as np
 import sys
 import pydub
 import lsanomaly
-from music_db import Segmented_Music_DB
+from featured_music_db import FeaturedMusicDB
 
 
 def main():
     if len(sys.argv) != 3:
         print "Bad usage! usage is {} " \
-            "<music-db-folder> <mp3-sample-path>".format(sys.argv[0])
+            "<music-db-folder> <mp3-test-path>".format(sys.argv[0])
         return
 
     music_db_folder = sys.argv[1]
-    sample_path = sys.argv[2]
+    test_path = sys.argv[2]
 
-    db = Segmented_Music_DB.from_existing(music_db_folder)
-    song_segments = []
-    duration_seconds = 0
+    db = FeaturedMusicDB.from_existing(music_db_folder)
+    songs = []
+    feature_extractor = None
     with db.open() as odb:
-        song_segments = odb.get_all_song_segments()
-        duration_seconds = odb._db_instance["_duration_seconds"]
+        songs = odb.get_all_songs()
+        feature_extractor = odb.get_extractor()
 
-    raw_song_arrays = [list(song.raw_data) for song in song_segments]
-    train_data = [[ord(c) for c in raw_array] for raw_array in raw_song_arrays]
+    train_data = [song.features for song in songs]
+
 
     print "Train data is of size {}".format(len(train_data))
-    # clf = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1) # Todo: switch back?
+    clf = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1) # Todo: switch back?
     # clf = svm.SVC()
-    clf = lsanomaly.LSAnomaly()
-
+    # clf = lsanomaly.LSAnomaly()
+    print train_data
     clf.fit(np.array(train_data))
 
-    sample = pydub.AudioSegment.from_mp3(sample_path)
-    print sample.frame_rate
-    sample_cut = sample[0:1000 * duration_seconds:]
-    sample_cut_array = list(sample_cut.raw_data)
-    sample_cut_test = [ord(c) for c in sample_cut_array] 
-    pred = clf.predict(np.array([sample_cut_test])) # TODO: better predication method
+
+    test_song = pydub.AudioSegment.from_mp3(test_path) 
+    test_data = feature_extractor.extract(test_song)
+
+    print 
+    print test_data
+    pred = clf.predict(np.array([test_data])) # TODO: better predication method
 
     print pred
-
-    if pred[0] == 0:
-        print "Sample {} is music!".format(sample_path)
-    else:
-        print "Sample {} is not music!".format(sample_path)
 
 if __name__ == "__main__":
     main()
