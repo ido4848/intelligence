@@ -216,10 +216,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-'''
-REFACTORING
-TODOS
-SONGS, METADATA IN THE SAME DB?
-'''

@@ -6,6 +6,9 @@ from featured_music_db import FeaturedMusicDB
 import feature_extractors
 
 
+FRAME_RATE = 44100
+CHANNELS = 2
+
 def collect_file_paths(folder, file_extension_regex):
     file_paths = []
     for root, _, file_names in os.walk(folder):
@@ -13,19 +16,8 @@ def collect_file_paths(folder, file_extension_regex):
             file_paths.append(root + "/" + file_name)
     return file_paths
 
-def main():
-    FRAME_RATE = 44100
-    CHANNELS = 2
 
-    if len(sys.argv) != 3:
-        print "Bad usage! usage is {} " \
-            "<music-folder-path>" \
-            " <music-db-folder>".format(sys.argv[0])
-        return
-
-    music_folder = sys.argv[1]
-    db_name = sys.argv[2]
-
+def crawl_music_folder(music_folder, db_name):
     mp3_song_files = collect_file_paths(music_folder, "[Mm][Pp]3")
     wav_song_files = collect_file_paths(music_folder, "[Ww][Aa][Ww]")
 
@@ -46,6 +38,19 @@ def main():
                 opened_db.add_song(wav_song_file, "wav")
             except Exception as e:
                 print "Error inserting mp3 song file {}: {}".format(mp3_song_file, e.message)
+
+
+def main():
+
+    if len(sys.argv) != 3:
+        print "Bad usage! usage is {} " \
+            "<music-folder-path>" \
+            " <music-db-folder>".format(sys.argv[0])
+        return
+
+    music_folder = sys.argv[1]
+    db_name = sys.argv[2]
+    crawl_music_folder(music_folder, db_name)
 
 if __name__ == "__main__":
     main()

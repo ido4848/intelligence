@@ -25,4 +25,6 @@ class IFeatureExtractor(object):
 
 class RawDataFeatureExtractor(object):
     def extract(self, song):
-        return [ord(c) for c in list(song.raw_data[0:10])]
+        raw_data_list = list(song.raw_data)
+        half = len(raw_data_list) / 2
+        return [ord(c) for c in raw_data_list][half:half + 10]
