@@ -51,7 +51,7 @@ class MusicDetector(object):
 
         with self._music_db.open() as odb:
             if not odb.does_song_match(test_song):
-                print "Song could not be deteced (does not match db format)."
+                print "Song {} could not be deteced (does not match db format).".format(song_file_path)
                 return
 
         test_data = None

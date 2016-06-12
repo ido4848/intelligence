@@ -11,7 +11,43 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR
 
 
-def detect_all(detector, test_folder):
+def detect_weighted(detector, test_folder, weight):
+    mp3_song_files = folder_crawler.collect_file_paths(test_folder, "[Mm][Pp]3")
+    wav_song_files = folder_crawler.collect_file_paths(test_folder, "[Ww][Aa][Ww]")
+
+    total_count = len(mp3_song_files) + len(wav_song_files)
+    success_count = 0
+
+    pred_sum = 0
+
+    predictions = {}
+    for mp3_song in mp3_song_files:
+        predictions[mp3_song] = detector.detect(mp3_song, "mp3")
+    for wav_song in wav_song_files:
+        predictions[wav_song] = detector.detect(wav_song, "wav")
+
+    for song, pred in predictions.iteritems():
+        if pred is None:
+            total_count -= 1
+            continue
+        pred_sum += pred
+        if weight > 0:
+            if pred >= weight:
+                success_count += 1
+            else:
+                print "(failed) prediction for {} is {}".format(song, pred)
+        else:
+            if pred <= -weight:
+                success_count += 1
+            else:
+                print "(failed) prediction for {} is {}".format(song, pred)
+
+
+    print "{} out of {} detected successfully, for weight {} in folder {}".format(success_count, total_count,
+                                                                                  weight, test_folder)
+    print "Average is {}".format(pred_sum/float(total_count))
+
+def detect_neutral(detector, test_folder):
     mp3_song_files = folder_crawler.collect_file_paths(test_folder, "[Mm][Pp]3")
     wav_song_files = folder_crawler.collect_file_paths(test_folder, "[Ww][Aa][Ww]")
 
@@ -26,6 +62,15 @@ def detect_all(detector, test_folder):
         print
 
 
+def detect_all(detector, test_folders):
+    for folder_type, test_folder in test_folders:
+        if folder_type == 0:
+            detect_neutral(detector, test_folder)
+        else:
+            detect_weighted(detector, test_folder, folder_type)
+        print
+
+
 FRAME_RATE = 44100
 CHANNELS = 2
 
@@ -34,7 +79,7 @@ def unit_print(msg):
     print "********************************** " + msg + " **********************************"
 
 
-def main_logic(train_folder, db_folder, test_folder, setup=True):
+def main_logic(train_folder, db_folder, test_folders, setup=True):
     ''''''
 
     if setup:
@@ -65,7 +110,7 @@ def main_logic(train_folder, db_folder, test_folder, setup=True):
     unit_print("Detector was trained")
 
     ''' DETECTING '''
-    detect_all(detector, test_folder)
+    detect_all(detector, test_folders)
     unit_print("Songs were deteceted")
 
 
@@ -80,9 +125,13 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    setup = raw_input("setup(1/0): ")
-    main_logic("/home/ido4848/Music/mp3s/train", "/home/ido4848/DB/raw_songs", "/home/ido4848/Music/mp3s",
-               setup=bool(setup))
+    setup = False
+    if raw_input("setup(True/False): ") in ['true', 'True', "TRUE", 't', 'y', 'yes', 'Y', '1']:
+        setup = True
+    test_folders = [(0.5, "/home/ido4848/Music/mp3s/train"), (-0.5, "/home/ido4848/Music/mp3s/negative_test"),
+                    (0.5, "/home/ido4848/Music/mp3s/positive_test")]
+    main_logic("/home/ido4848/Music/mp3s/train", "/home/ido4848/DB/raw_songs", test_folders,
+               setup=setup)
 
 '''
 REFACTORING:
@@ -94,5 +143,5 @@ REFACTORING:
 IMPROVMENTS:
     DB_SIZE
     FEATURE_EXTRACTION
-    ALGORITHM
+    ALGORITHM (proba?, regression?)
 '''
