@@ -40,25 +40,17 @@ class MusicDetector(object):
         except Exception as e:
             print "Error in fitting regressioner(using one tag): {}".format(e.message)
 
-    def detect(self, song_file_path, file_format):
-        test_song = None
-        if file_format == "mp3":
-            test_song = pydub.AudioSegment.from_mp3(song_file_path)
-        elif file_format == "wav":
-            test_song = pydub.AudioSegment.from_wav(song_file_path)
-        else:
-            raise Exception("File format not supported.")
-
+    def detect_from_song(self, song_object):
         with self._music_db.open() as odb:
-            if not odb.does_song_match(test_song):
-                print "Song {} could not be deteced (does not match db format).".format(song_file_path)
+            if not odb.does_song_match(song_object):
+                print "Song could not be deteced (does not match db format)."
                 return
 
         test_data = None
         try:
-            test_data = self._feature_extractor.extract(test_song)
+            test_data = self._feature_extractor.extract(song_object)
         except Exception as e:
-            print "Error in extracting features from song {}: {}".format(song_file_path, e.message)
+            print "Error in extracting features from song: {}".format(e.message)
             return
 
         try:
@@ -72,6 +64,17 @@ class MusicDetector(object):
             return pred[0]
         except Exception as e:
             print "Error in predicting song: {}".format(e.message)
+
+    def detect_from_file(self, song_file_path, file_format):
+        test_song = None
+        if file_format == "mp3":
+            test_song = pydub.AudioSegment.from_mp3(song_file_path)
+        elif file_format == "wav":
+            test_song = pydub.AudioSegment.from_wav(song_file_path)
+        else:
+            raise Exception("File format not supported.")
+
+        return self.detect_from_song(test_song)
 
 
 def main():
@@ -88,7 +91,7 @@ def main():
     # clf = svm.SVC()
     # clf = lsanomaly.LSAnomaly()
     detector = MusicDetector(music_db_folder, clf)
-    pred = detector.detect(test_path, test_format)
+    pred = detector.detect_from_file(test_path, test_format)
     print "pred for {} is {}".format(test_path, pred)
 
 

@@ -22,9 +22,9 @@ def detect_weighted(detector, test_folder, weight):
 
     predictions = {}
     for mp3_song in mp3_song_files:
-        predictions[mp3_song] = detector.detect(mp3_song, "mp3")
+        predictions[mp3_song] = detector.detect_from_file(mp3_song, "mp3")
     for wav_song in wav_song_files:
-        predictions[wav_song] = detector.detect(wav_song, "wav")
+        predictions[wav_song] = detector.detect_from_file(wav_song, "wav")
 
     for song, pred in predictions.iteritems():
         if pred is None:
@@ -52,12 +52,12 @@ def detect_neutral(detector, test_folder):
     wav_song_files = folder_crawler.collect_file_paths(test_folder, "[Ww][Aa][Ww]")
 
     for mp3_song in mp3_song_files:
-        pred = detector.detect(mp3_song, "mp3")
+        pred = detector.detect_from_file(mp3_song, "mp3")
         print "prediction for {} is {} ({})".format(mp3_song, pred, pred >= 0.5)
         print
 
     for wav_song in wav_song_files:
-        pred = detector.detect(wav_song, "wav")
+        pred = detector.detect_from_file(wav_song, "wav")
         print "prediction for {} is {} ({})".format(wav_song, pred, pred >= 0.5)
         print
 
@@ -141,7 +141,7 @@ REFACTORING:
 
 '''
 IMPROVMENTS:
-    DB_SIZE
-    FEATURE_EXTRACTION
+    DB_SIZE (classical?)
+    FEATURE_EXTRACTION (rosalib?)
     ALGORITHM (proba?, regression?)
 '''
