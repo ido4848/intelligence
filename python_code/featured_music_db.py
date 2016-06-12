@@ -18,32 +18,28 @@ class Song(object):
 
 class SongAlreadyExists(Exception):
     def __init__(self):
-
         # Call the base class constructor with the parameters it needs
         super(SongAlreadyExists, self).__init__("Song already in db!")
 
 
 class SongNotFound(Exception):
     def __init__(self):
-
         # Call the base class constructor with the parameters it needs
         super(SongNotFound, self).__init__("Song is not in db!")
 
 
 class DBNotOpen(Exception):
     def __init__(self, db_folder):
-
         # Call the base class constructor with the parameters it needs
         super(SongNotFound,
-              self).__init__("DB " +str(db_folder) + " is not open!")
+              self).__init__("DB " + str(db_folder) + " is not open!")
 
 
 class SoundFormatNotSupported(Exception):
     def __init__(self, format):
-
         # Call the base class constructor with the parameters it needs
         super(SoundFormatNotSupported, self).__init__(
-            "Sound format " +str(format) + " is not supported.")
+            "Sound format " + str(format) + " is not supported.")
 
 
 class FeaturedMusicDB(object):
@@ -60,6 +56,7 @@ class FeaturedMusicDB(object):
         self._db_instance = None
         self.open()
         self._channels = self._db_instance["_channels"]
+        self._frame_rate = self._db_instance["_frame_rate"]
         self._index_counter = self._db_instance["_index_counter"]
         self._feature_extractor = self._db_instance["_feature_extractor"]
         self.close()
@@ -83,6 +80,7 @@ class FeaturedMusicDB(object):
         self._db_instance = None
         self.open()
         self._db_instance["_channels"] = self._channels
+        self._db_instance["_frame_rate"] = self._frame_rate
         self._db_instance["_index_counter"] = self._index_counter
         self._db_instance["_feature_extractor"] = self._feature_extractor
         self.close()
@@ -114,52 +112,66 @@ class FeaturedMusicDB(object):
         else:
             raise SoundFormatNotSupported(file_format)
 
-    def _does_song_match(self, song):
+    def does_song_match(self, song):
         return song.frame_rate == self._frame_rate and song.channels == self._channels
+
+    def add_mp3s(self, mp3_song_files):
+        for mp3_song_file in mp3_song_files:
+            try:
+                self.add_song(mp3_song_file, "mp3")
+            except Exception as e:
+                print "Error inserting mp3 song file {}: {}".format(mp3_song_file , e.args)
+
+    def add_wavs(self, wav_song_files):
+        for wav_song_file in wav_song_files:
+            try:
+                self.add_song(wav_song_file, "wav")
+            except Exception as e:
+                print "Error inserting mp3 song file {}: {}".format(wav_song_file, e.message)
 
     def add_song(self, song_file_path, file_format):
         if self._db_instance is None:
             raise DBNotOpen(self._folder)
 
         song = self._open_song(song_file_path, file_format)
-        if not self._does_song_match(song):
+        if not self.does_song_match(song):
             raise Exception("Song does not match db format")
 
         features = self._feature_extractor.extract(song)
 
         self._index_counter += 1
 
-        self._db_instance[str(self._index_counter)] =  Song(song_file_path, file_format, [], features)
+        self._db_instance[str(self._index_counter)] = Song(song_file_path, file_format, [], features)
         self._db_instance["_index_counter"] = self._index_counter
 
         return self._index_counter
 
     def remove_song(self, song_counter):
-        song_name = str(song_name)
+        song_counter = str(song_counter)
         if self._db_instance is None:
             raise DBNotOpen(self._folder)
 
-        if song_name not in self._db_instance:
+        if song_counter not in self._db_instance:
             raise SongNotFound()
 
-        self._db_instance[song_name] = None
-        del self._db_instance[song_name]
+        self._db_instance[song_counter] = None
+        del self._db_instance[song_counter]
 
     def get_song(self, song_counter):
-        song_name = str(song_name)
+        song_counter = str(song_counter)
         if self._db_instance is None:
             raise DBNotOpen(self._folder)
 
-        if song_name not in self._db_instance:
+        if song_counter not in self._db_instance:
             raise SongNotFound()
 
-        return self._db_instance[song_name]
+        return self._db_instance[song_counter]
 
     def get_all_songs(self):
         items = self._db_instance.items()
         songs = []
         for item in items:
-            if type(item[1]) == type(Song("","","","")):
+            if type(item[1]) == type(Song("", "", "", "")):
                 songs += [item[1]]
         return songs
 
@@ -168,9 +180,8 @@ class FeaturedMusicDB(object):
 
 
 def create_test_db(db_folder, frame_rate, channels, duration_in_seconds, test_song_path):
-    db = Featured_Music_DB.create_new(db_folder, frame_rate, channels, duration_in_seconds)
+    db = FeaturedMusicDB.create_new(db_folder, frame_rate, channels, duration_in_seconds)
     with db.open() as opened_db:
-
         index = opened_db.add_song(test_song_path, "mp3")
         print "song was inserted in index {}".format(index)
         opened_db.remove_song(index)
@@ -186,7 +197,7 @@ def create_test_db(db_folder, frame_rate, channels, duration_in_seconds, test_so
 
 
 def play_music_from_db(db_folder, count):
-    db = Featured_Music_DB.from_existing(db_folder)
+    db = FeaturedMusicDB.from_existing(db_folder)
     with db.open() as odb:
         this_count = 0
         songs = odb.get_all_songs()
@@ -199,10 +210,11 @@ def play_music_from_db(db_folder, count):
                 pass
 
 
-def main():
-    FRAME_RATE = 44100
-    CHANNELS = 2
+FRAME_RATE = 44100
+CHANNELS = 2
 
+
+def main():
     if len(sys.argv) == 3:
         play_music_from_db(sys.argv[1], int(sys.argv[2]))
 

@@ -10,38 +10,41 @@ import numpy as np
 import copy
 from sklearn import metrics, base, neighbors
 
+
 def median_kneighbour_distance(X, k=5):
     """Calculate the median distance between a set of random datapoints and
     their kth nearest neighbours. This is a heuristic for setting the
     kernel length scale."""
     N_all = X.shape[0]
-    N_subset = min(N_all,2000)
+    N_subset = min(N_all, 2000)
     sample_idx_train = np.random.permutation(N_all)[:N_subset]
     nn = neighbors.NearestNeighbors(k)
-    nn.fit(X[sample_idx_train,:])
-    d, idx = nn.kneighbors(X[sample_idx_train,:])
-    return np.median(d[:,-1])
-    
+    nn.fit(X[sample_idx_train, :])
+    d, idx = nn.kneighbors(X[sample_idx_train, :])
+    return np.median(d[:, -1])
+
+
 def pair_distance_centile(X, centile, max_pairs=5000):
     """Calculate centiles of distances between random pairs in a dataset.
     This an alternative to the median kNN distance for setting the kernel 
-    length scale."""           
+    length scale."""
     N = X.shape[0]
-    n_pairs = min(max_pairs,N**2)
-    #randorder1 = np.random.permutation(N)
-    #randorder2 = np.random.permutation(N)    
-    
+    n_pairs = min(max_pairs, N ** 2)
+    # randorder1 = np.random.permutation(N)
+    # randorder2 = np.random.permutation(N)
+
     dists = np.zeros(n_pairs)
-    
+
     for i in range(n_pairs):
-        pair = np.random.randint(0,N,2)
-        pairdiff = X[pair[0],:]-X[pair[1],:]
-        dists[i] = np.dot(pairdiff,pairdiff.T)
+        pair = np.random.randint(0, N, 2)
+        pairdiff = X[pair[0], :] - X[pair[1], :]
+        dists[i] = np.dot(pairdiff, pairdiff.T)
     dists.sort()
-    
-    out = dists[int(n_pairs*centile/100.)]
+
+    out = dists[int(n_pairs * centile / 100.)]
     return np.sqrt(out)
-                
+
+
 class LSAnomaly(base.BaseEstimator):
     """Class for training an inlier model and predicting outlier 
     probabilities for test data, using a least-squares kernel-based method.
@@ -79,7 +82,8 @@ class LSAnomaly(base.BaseEstimator):
            [  5.15255628e-103,   1.00000000e+000],
            [  1.00000000e+000,   0.00000000e+000]])  
     """
-    def __init__(self, n_kernels_max=500, kernel_pos=None, sigma=None, 
+
+    def __init__(self, n_kernels_max=500, kernel_pos=None, sigma=None,
                  rho=None, gamma=None):
         self.n_kernels_max = n_kernels_max
         self.kernel_pos = kernel_pos
@@ -87,11 +91,11 @@ class LSAnomaly(base.BaseEstimator):
         self.gamma = gamma
         self.rho = rho
         self.theta = None
-        if not (sigma==None or isinstance(sigma,str)):
-            self.gamma = sigma**-2
-        if not gamma==None:
-            self.sigma = gamma**-.5
-        
+        if not (sigma == None or isinstance(sigma, str)):
+            self.gamma = sigma ** -2
+        if not gamma == None:
+            self.sigma = gamma ** -.5
+
     def fit(self, X, y=None):
         """Fit the inlier model given training data. This function attempts
         to choose reasonable defaults for parameters sigma and rho if none
@@ -109,44 +113,44 @@ class LSAnomaly(base.BaseEstimator):
             classes or to the outlier class.
         """
         N = X.shape[0]
-        
-        if y==None:
+
+        if y == None:
             y = np.zeros(N)
 
         self.classes = list(set(y))
         self.classes.sort()
         self.n_classes = len(self.classes)
-        
+
         # If no kernel parameters specified, try to choose some defaults
         if not self.sigma:
-                self.sigma = median_kneighbour_distance(X)
-                self.gamma = self.sigma**-2
-                
+            self.sigma = median_kneighbour_distance(X)
+            self.gamma = self.sigma ** -2
+
         if not self.gamma:
-            self.gamma = self.sigma**-2
-        
+            self.gamma = self.sigma ** -2
+
         if not self.rho:
             self.rho = 0.1
-        
+
         # choose kernel basis centres
-        if self.kernel_pos==None: 
-            B = min(self.n_kernels_max,N)
+        if self.kernel_pos == None:
+            B = min(self.n_kernels_max, N)
             kernel_idx = np.random.permutation(N)
             self.kernel_pos = X[kernel_idx[:B]]
         else:
             B = self.kernel_pos.shape[0]
-        
+
         # fit coefficients
         Phi = metrics.pairwise.rbf_kernel(X, self.kernel_pos, self.gamma)
         theta = {}
-        Phi_PhiT = np.dot(Phi.T,Phi)
-        inverse_term = np.linalg.inv(Phi_PhiT + self.rho*np.eye(B))
+        Phi_PhiT = np.dot(Phi.T, Phi)
+        inverse_term = np.linalg.inv(Phi_PhiT + self.rho * np.eye(B))
         for c in self.classes:
-            m = (y==c).astype(int)
-            theta[c] = np.dot(inverse_term,np.dot(Phi.T,m))
-            
+            m = (y == c).astype(int)
+            theta[c] = np.dot(inverse_term, np.dot(Phi.T, m))
+
         self.theta = theta
-        
+
     def predict(self, X):
         """Assign classes to test data.
         
@@ -171,10 +175,10 @@ class LSAnomaly(base.BaseEstimator):
         allclasses = copy.copy(self.classes)
         allclasses.append('anomaly')
         for i in range(X.shape[0]):
-            predictions.append(allclasses[predictions_proba[i,:].argmax()])
+            predictions.append(allclasses[predictions_proba[i, :].argmax()])
         return predictions
-        
-    def predict_proba(self,X):
+
+    def predict_proba(self, X):
         """Calculate posterior probabilities of each inlier class and the
         outlier class for test data.
 
@@ -193,18 +197,18 @@ class LSAnomaly(base.BaseEstimator):
         """
         Phi = metrics.pairwise.rbf_kernel(X, self.kernel_pos, self.gamma)
         N = X.shape[0]
-        predictions = np.zeros((N,self.n_classes+1))
+        predictions = np.zeros((N, self.n_classes + 1))
         for i in range(N):
             post = np.zeros(self.n_classes)
             for c in range(self.n_classes):
-                post[c] = max(0,np.dot(self.theta[self.classes[c]].T, 
-                                       Phi[i,:]))
-                post[c] = min(post[c],1.)
-            predictions[i,:-1] = post
-            predictions[i,-1] = max(0,1-sum(post))
-            
+                post[c] = max(0, np.dot(self.theta[self.classes[c]].T,
+                                        Phi[i, :]))
+                post[c] = min(post[c], 1.)
+            predictions[i, :-1] = post
+            predictions[i, -1] = max(0, 1 - sum(post))
+
         return predictions
-        
+
     def decision_function(self, X):
         """Generate an inlier score for each test data example 
         
@@ -222,10 +226,10 @@ class LSAnomaly(base.BaseEstimator):
             inliers have values close to one).
         """
         predictions = self.predict_proba(X)
-        out = np.zeros((predictions.shape[0],1))
-        out[:,0] = 1 - predictions[:,-1]
+        out = np.zeros((predictions.shape[0], 1))
+        out[:, 0] = 1 - predictions[:, -1]
         return out
-      
+
     def score(self, X, y):
         """Calculate accuracy score, needed because of bug in 
         metrics.accuracy_score when comparing list with numpy array."""
@@ -233,9 +237,9 @@ class LSAnomaly(base.BaseEstimator):
         true = 0
         total = 0
         for i in range(len(predictions)):
-            if predictions[i]==y[i]:
+            if predictions[i] == y[i]:
                 true += 1
-        return 10.*true/total
+        return 10. * true / total
 
     def predict_sequence(self, X, A, pi, inference='smoothing'):
         """Calculate class probabilities for a sequence of data.
@@ -257,30 +261,30 @@ class LSAnomaly(base.BaseEstimator):
             classes, or the outlier class (last column).
         """
         obsll = self.predict_proba(X)
-        T,S = obsll.shape
-        alpha = np.zeros((T,S))
-        
-        alpha[0,:] = pi
-        for t in range(1,T):
-            alpha[t,:] = np.dot(alpha[t-1,:],A)
+        T, S = obsll.shape
+        alpha = np.zeros((T, S))
+
+        alpha[0, :] = pi
+        for t in range(1, T):
+            alpha[t, :] = np.dot(alpha[t - 1, :], A)
             for s in range(S):
-                alpha[t,s] *= obsll[t,s]
-            alpha[t,:] = alpha[t,:]/sum(alpha[t,:])
-        
-        if inference=='filtering':
+                alpha[t, s] *= obsll[t, s]
+            alpha[t, :] = alpha[t, :] / sum(alpha[t, :])
+
+        if inference == 'filtering':
             return alpha
-        else:            
-            beta = np.zeros((T,S))
-            gamma = np.zeros((T,S))
-            beta[T-1,:] = np.ones(S)
-            for t in range(T-2,-1,-1):
+        else:
+            beta = np.zeros((T, S))
+            gamma = np.zeros((T, S))
+            beta[T - 1, :] = np.ones(S)
+            for t in range(T - 2, -1, -1):
                 for i in range(S):
                     for j in range(S):
-                        beta[t,i] += A[i,j]*obsll[t+1,j]*beta[t+1,j] 
-                beta[t,:] = beta[t,:]/sum(beta[t,:])
-                
+                        beta[t, i] += A[i, j] * obsll[t + 1, j] * beta[t + 1, j]
+                beta[t, :] = beta[t, :] / sum(beta[t, :])
+
             for t in range(T):
-                gamma[t,:] = alpha[t,:]*beta[t,:]
-                gamma[t,:] = gamma[t,:]/sum(gamma[t,:])
-                
+                gamma[t, :] = alpha[t, :] * beta[t, :]
+                gamma[t, :] = gamma[t, :] / sum(gamma[t, :])
+
             return gamma
