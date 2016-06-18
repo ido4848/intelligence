@@ -42,10 +42,10 @@ def detect_weighted(detector, test_folder, weight):
             else:
                 print "(failed) prediction for {} is {}".format(song, pred)
 
-
     print "{} out of {} detected successfully, for weight {} in folder {}".format(success_count, total_count,
                                                                                   weight, test_folder)
-    print "Average is {}".format(pred_sum/float(total_count))
+    print "Average is {}".format(pred_sum / float(total_count))
+
 
 def detect_neutral(detector, test_folder):
     mp3_song_files = folder_crawler.collect_file_paths(test_folder, "[Mm][Pp]3")
@@ -79,7 +79,7 @@ def unit_print(msg):
     print "********************************** " + msg + " **********************************"
 
 
-def main_logic(train_folder, db_folder, test_folders, setup=True):
+def get_detector(train_folder, db_folder, setup=True):
     ''''''
 
     if setup:
@@ -108,7 +108,12 @@ def main_logic(train_folder, db_folder, test_folders, setup=True):
     # clf = SVR(kernel='rbf', C=1e3, gamma=0.1)
     detector = music_detector.MusicDetector(db_folder, clf)
     unit_print("Detector was trained")
+    return detector
 
+
+def main_logic(train_folder, db_folder, test_folders, setup=True):
+    ''''''
+    detector = get_detector(train_folder, db_folder, setup)
     ''' DETECTING '''
     detect_all(detector, test_folders)
     unit_print("Songs were deteceted")

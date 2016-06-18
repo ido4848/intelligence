@@ -87,7 +87,7 @@ class ChristianPecceiFeatureExtractor(object):
         """Returns two chunks of sound data from wave file."""
         w = wave.open(wav_file)
         n = 100000
-        if w.getnframes() < 100000:
+        if w.getnframes() < n:
             raise ValueError('Wave file too short (less than 10 seconds)')
         frames = w.readframes(n)
         wav_data = struct.unpack('%dh' % n, frames)

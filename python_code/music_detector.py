@@ -3,6 +3,7 @@ import numpy as np
 import sys
 import sklearn
 import featured_music_db
+import shelve
 
 
 class MusicDetector(object):
