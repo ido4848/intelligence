@@ -71,7 +71,7 @@ class LSAnomaly(base.BaseEstimator):
         
     Example
     -------
-    >>> import lsanomaly
+    >>> from modules.lsanomaly import lsanomaly
     >>> X_train = np.array([[1.1],[1.3],[1.2],[1.05]])
     >>> X_test = np.array([[1.15],[3.6],[1.25]])
     >>> anomalymodel.fit(X_train)

@@ -1,14 +1,12 @@
 import sys
+
+import feature_extractors
+import featured_music_db
 import folder_crawler
 import music_detector
-import featured_music_db
-import feature_extractors
 
+import imp
 from lsanomaly import LSAnomaly
-from sklearn import svm
-from sklearn import linear_model
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.svm import SVR
 
 
 def detect_weighted(detector, test_folder, weight):
