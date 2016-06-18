@@ -1,9 +1,10 @@
-import pydub
 import numpy as np
 import sys
+
+import pydub
 import sklearn
+
 import featured_music_db
-import shelve
 
 
 class MusicDetector(object):
