@@ -42,15 +42,15 @@ class MusicDetector(object):
         except Exception as e:
             print "Error in fitting regressioner(using one tag): {}".format(e.message)
 
-    def detect_from_song(self, song_object):
+    def detect_from_song(self, song_object, song_object_format):
         with self._music_db.open() as odb:
-            if not odb.does_song_match(song_object):
+            if not odb._matching_predicate(song_object, song_object_format):
                 print "Song could not be deteced (does not match db format)."
                 return
 
         test_data = None
         try:
-            test_data = self._feature_extractor.extract(song_object)
+            test_data = self._feature_extractor.extract(song_object, song_object_format)
         except Exception as e:
             print "Error in extracting features from song: {}".format(e.message)
             return
@@ -69,14 +69,19 @@ class MusicDetector(object):
 
     def detect_from_file(self, song_file_path, file_format):
         test_song = None
+        song_object_format = None
         if file_format == "mp3":
             test_song = pydub.AudioSegment.from_mp3(song_file_path)
+            song_object_format = "pydub"
         elif file_format == "wav":
             test_song = pydub.AudioSegment.from_wav(song_file_path)
+            song_object_format = "pydub"
+        elif file_format == "midi":
+            raise NotImplementedError()
         else:
             raise Exception("File format not supported.")
 
-        return self.detect_from_song(test_song)
+        return self.detect_from_song(test_song, song_object_format)
 
 
 def main():

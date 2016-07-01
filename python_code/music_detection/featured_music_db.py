@@ -6,6 +6,7 @@ import os
 import shelve
 import re
 import random
+import feature_extractors
 
 
 class Song(object):
@@ -55,8 +56,7 @@ class FeaturedMusicDB(object):
 
         self._db_instance = None
         self.open()
-        self._channels = self._db_instance["_channels"]
-        self._frame_rate = self._db_instance["_frame_rate"]
+        self._matching_predicate = self._db_instance["_matching_predicate"]
         self._index_counter = self._db_instance["_index_counter"]
         self._feature_extractor = self._db_instance["_feature_extractor"]
         self.close()
@@ -64,7 +64,7 @@ class FeaturedMusicDB(object):
         return self
 
     @staticmethod
-    def create_new(db_folder, frame_rate, channels, feature_extractor):
+    def create_new(db_folder, matching_predicate, feature_extractor):
         self = FeaturedMusicDB()
 
         self._folder = db_folder
@@ -72,15 +72,13 @@ class FeaturedMusicDB(object):
         if not os.path.exists(self._folder):
             os.makedirs(self._folder)
 
-        self._frame_rate = frame_rate
-        self._channels = channels
+        self._matching_predicate = matching_predicate
         self._index_counter = 0
         self._feature_extractor = feature_extractor
 
         self._db_instance = None
         self.open()
-        self._db_instance["_channels"] = self._channels
-        self._db_instance["_frame_rate"] = self._frame_rate
+        self._db_instance["_matching_predicate"] = self._matching_predicate
         self._db_instance["_index_counter"] = self._index_counter
         self._db_instance["_feature_extractor"] = self._feature_extractor
         self.close()
@@ -105,22 +103,22 @@ class FeaturedMusicDB(object):
     def _open_song(self, song_file_path, file_format):
         wav_regex = re.compile("[Ww][Aa][Vv]([Ee])?")
         mp3_regex = re.compile("[Mm][Pp]3")
+        midi_regex = re.compile("[Mm][Ii][Dd]([Ii])?")
         if wav_regex.match(file_format) is not None:
-            return pydub.AudioSegment.from_wav(song_file_path)
+            return pydub.AudioSegment.from_wav(song_file_path), "pydub"
         elif mp3_regex.match(file_format) is not None:
-            return pydub.AudioSegment.from_mp3(song_file_path)
+            return pydub.AudioSegment.from_mp3(song_file_path), "pydub"
+        elif midi_regex.match(file_format) is not None:
+           raise NotImplementedError()
         else:
             raise SoundFormatNotSupported(file_format)
-
-    def does_song_match(self, song):
-        return song.frame_rate == self._frame_rate and song.channels == self._channels
 
     def add_mp3s(self, mp3_song_files):
         for mp3_song_file in mp3_song_files:
             try:
                 self.add_song(mp3_song_file, "mp3")
             except Exception as e:
-                print "Error inserting mp3 song file {}: {}".format(mp3_song_file , e.args)
+                print "Error inserting mp3 song file {}: {}".format(mp3_song_file, e.args)
 
     def add_wavs(self, wav_song_files):
         for wav_song_file in wav_song_files:
@@ -133,11 +131,15 @@ class FeaturedMusicDB(object):
         if self._db_instance is None:
             raise DBNotOpen(self._folder)
 
-        song = self._open_song(song_file_path, file_format)
-        if not self.does_song_match(song):
+        song, song_object_format = self._open_song(song_file_path, file_format)
+        if not self._matching_predicate(song, song_object_format):
             raise Exception("Song does not match db format")
 
-        features = self._feature_extractor.extract(song)
+        try:
+            features = self._feature_extractor.extract(song, song_object_format)
+        except Exception as e:
+            print "Error during extracting features from {}:{}".format(song_file_path, e.message)
+            return
 
         self._index_counter += 1
 
@@ -179,23 +181,6 @@ class FeaturedMusicDB(object):
         return self._feature_extractor
 
 
-def create_test_db(db_folder, frame_rate, channels, duration_in_seconds, test_song_path):
-    db = FeaturedMusicDB.create_new(db_folder, frame_rate, channels, duration_in_seconds)
-    with db.open() as opened_db:
-        index = opened_db.add_song(test_song_path, "mp3")
-        print "song was inserted in index {}".format(index)
-        opened_db.remove_song(index)
-        print "Song indexed {} was removed from db".format(index)
-
-        index = opened_db.add_song(test_song_path, "mp3")
-        print "Song was inserted by index with index {}".format(index)
-        opened_db.remove_song(index)
-        print "Song indexed {} was removed from db".format(index)
-
-        index = opened_db.add_song(test_song_path, "mp3")
-        print "Song was inserted by index with index {}".format(index)
-
-
 def play_music_from_db(db_folder, count):
     db = FeaturedMusicDB.from_existing(db_folder)
     with db.open() as odb:
@@ -210,16 +195,9 @@ def play_music_from_db(db_folder, count):
                 pass
 
 
-FRAME_RATE = 44100
-CHANNELS = 2
-
-
 def main():
     if len(sys.argv) == 3:
         play_music_from_db(sys.argv[1], int(sys.argv[2]))
-
-    elif len(sys.argv) == 4:
-        create_test_db(sys.argv[1], FRAME_RATE, CHANNELS, int(sys.argv[2]), sys.argv[3], )
 
     else:
         print "Not a valid number of parameters"

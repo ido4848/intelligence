@@ -18,3 +18,12 @@ possible extraction libs:
     http://stackoverflow.com/questions/1461945/audio-feature-extraction
 
 
+# music-creation
+
+A python lib for creating random music.
+
+possible frameworks:
+    pyEvolve
+    DEAP
+    pySTEP
+

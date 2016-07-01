@@ -10,7 +10,7 @@ import sys
 
 
 class IFeatureExtractor(object):
-    def extract(self, song):
+    def extract(self, song, song_object_format):
         raise NotImplementedError()
 
 
@@ -30,7 +30,9 @@ class IFeatureExtractor(object):
 
 
 class RawDataFeatureExtractor(object):
-    def extract(self, song):
+    def extract(self, song, song_object_format):
+        if song_object_format != "pydub":
+            raise Exception("Format has to be pydub!")
         raw_data_list = list(song.raw_data)
         half = len(raw_data_list) / 2
         return [ord(c) for c in raw_data_list][half:half + 5]
@@ -105,7 +107,9 @@ class ChristianPecceiFeatureExtractor(object):
         # We'll cover how the features are computed in the next section!
         return ChristianPecceiFeatureExtractor.features(wav_data)
 
-    def extract(self, song):
+    def extract(self, song, song_object_format):
+        if song_object_format != "pydub":
+            raise Exception("Format has to be pydub!")
         song.export("temp.mp3", format="mp3")
         features = ChristianPecceiFeatureExtractor.compute_features("temp.mp3")
 

@@ -54,9 +54,9 @@ class MusicCreator(object):
 
     def create(self, iterations, freq_stats=0):
         def eval_func(raw_genome):
-            song_object = self._genome_to_song_object(raw_genome)
-            pred = self._music_detector.detect_from_song(song_object)
-            print pred
+            song_object, song_object_format = self._genome_to_song_object(raw_genome)
+            pred = self._music_detector.detect_from_song(song_object, song_object_format)
+            # print pred
             return pred
 
         # Enable the pyevolve logging system

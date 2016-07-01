@@ -71,6 +71,12 @@ FRAME_RATE = 44100
 CHANNELS = 2
 
 
+def does_song_match(song, song_object_format):
+    if song_object_format != "pydub":
+        return False
+    return song.frame_rate == FRAME_RATE and song.channels == CHANNELS
+
+
 def unit_print(msg):
     print "********************************** " + msg + " **********************************"
 
@@ -89,7 +95,7 @@ def get_detector(train_folder, db_folder, setup=True):
         # extractor = feature_extractors.RawDataFeatureExtractor()
         extractor = feature_extractors.ChristianPecceiFeatureExtractor()
 
-        db = featured_music_db.FeaturedMusicDB.create_new(db_folder, FRAME_RATE, CHANNELS, extractor)
+        db = featured_music_db.FeaturedMusicDB.create_new(db_folder, does_song_match, extractor)
         with db.open() as odb:
             odb.add_mp3s(mp3_song_files)
             odb.add_wavs(wav_song_files)
@@ -107,9 +113,10 @@ def get_detector(train_folder, db_folder, setup=True):
     return detector
 
 
-def main_logic(train_folder, db_folder, test_folders, setup=True):
+def detection_logic(train_folder, db_folder, test_folders, setup=True, detector=None):
     ''''''
-    detector = get_detector(train_folder, db_folder, setup)
+    if detector is None:
+        detector = get_detector(train_folder, db_folder, setup)
     ''' DETECTING '''
     detect_all(detector, test_folders)
     unit_print("Songs were deteceted")
@@ -121,7 +128,7 @@ def main():
               "<train_music_folder>" \
               " <music-db-folder> <test_music_folder>".format(sys.argv[0])
         return
-    main_logic(sys.argv[1], sys.argv[2], sys.argv[3])
+    detection_logic(sys.argv[1], sys.argv[2], sys.argv[3])
 
 
 if __name__ == "__main__":
@@ -131,8 +138,8 @@ if __name__ == "__main__":
         setup = True
     test_folders = [(0.5, "/home/ido4848/Music/mp3s/train"), (-0.5, "/home/ido4848/Music/mp3s/negative_test"),
                     (0.5, "/home/ido4848/Music/mp3s/positive_test")]
-    main_logic("/home/ido4848/Music/mp3s/train", "/home/ido4848/DB/raw_songs", test_folders,
-               setup=setup)
+    detection_logic("/home/ido4848/Music/mp3s/train", "/home/ido4848/DB/raw_songs", test_folders,
+                    setup=setup)
 
 '''
 REFACTORING:

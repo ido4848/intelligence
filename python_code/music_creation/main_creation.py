@@ -9,13 +9,14 @@ from pyevolve import DBAdapters
 import pyevolve
 from pyevolve import Initializators, Mutators
 
+
 def pyevolve_continues_example():
     # Find negative values
     def eval_func(ind):
-       score = 0.0
-       for x in xrange(0,len(ind)):
-          if ind[x] <= 0.0: score += 0.1
-       return score
+        score = 0.0
+        for x in xrange(0, len(ind)):
+            if ind[x] <= 0.0: score += 0.1
+        return score
 
     # Genome instance
     genome = G1DList.G1DList(20)
@@ -93,13 +94,14 @@ def pyevolve_discrete_example():
     best = ga.bestIndividual()
     print best.genomeList
 
+
 def deap_example():
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
     toolbox = base.Toolbox()
     toolbox.register("attr_bool", random.randint, 0, 1)
-    toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool , 2)
+    toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 2)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     def evalOneMax(individual):
@@ -127,6 +129,7 @@ def main():
     # pyevolve_continues_example()
     pyevolve_discrete_example()
     # deap_example()
+
 
 if __name__ == "__main__":
     main()
