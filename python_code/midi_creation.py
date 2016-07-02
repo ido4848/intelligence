@@ -89,73 +89,39 @@ def get_midi_functions(duration_seconds):
     return functions
 
 
-def midi_main():
-    positive_folder = "/home/ido4848/Music/train/midi_train"
-    iterations = 3
-    freq_stats = 1
-    item_path = "/home/ido4848/Music/create_midi_8.mid"
-    data_path = "/home/ido4848/DB/midi_test_data"  # TODO: A BUG HERE
-    duration_seconds = 5
+def midi_main(duration_seconds, iterations, freq_stats, positive_folder, data_path, item_path, setup=False,
+              verbose=True):
     functions = get_midi_functions(duration_seconds)
-    verbose = True
-    setup = False
-
     src.intelligent_logic.main_logic(functions, positive_folder, iterations, freq_stats, item_path,
                                      data_path=data_path, setup=setup, verbose=verbose)
 
 
 def main():
-    midi_main()
+    midi_main(5, 3, 1, "/home/ido4848/Music/train/midi_classical_train", "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_1.mid", setup=True)
+
+    midi_main(15, 30, 5, None, "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_2.mid", setup=False)
+
+    midi_main(30, 50, 10, None, "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_3.mid", setup=False)
+
+    midi_main(30, 100, 20, None, "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_4.mid", setup=False)
+
+    midi_main(60, 100, 20, None, "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_5.mid", setup=False)
+
+    midi_main(60, 200, 20, None, "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_6.mid", setup=False)
+
+    midi_main(60, 500, 50, None, "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_6.mid", setup=False)
+
+    midi_main(100, 1000, 100, None, "/home/ido4848/DB/midi_classical_data",
+              "/home/ido4848/Music/classical_created_midi_6.mid", setup=False)
 
 
 if __name__ == "__main__":
     main()
 
-'''
-
-def main():
-    setup = False
-    if raw_input("setup(True/False): ") in ['true', 'True', "TRUE", 't', 'y', 'yes', 'Y', '1']:
-        setup = True
-
-    train_folder = "/home/ido4848/Music/mp3s/train/The top 100 masterpieces 1685-1928"
-    old_train_folder = "/home/ido4848/Music/mp3s/train/old"
-    negative_folder = "/home/ido4848/Music/mp3s/negative_test"
-    positive_folder = "/home/ido4848/Music/mp3s/positive_test"
-    db_folder = "/home/ido4848/DB/classical_100_masterpieces_db_v2"
-    old_db_folder = "/home/ido4848/DB/raw_songs_v2"
-
-    test_folders = [(0.5, train_folder), (-0.5, negative_folder), (0.5, positive_folder)]
-    music_detector = music_detection.main_detection.get_detector(train_folder,
-                                                                 db_folder, setup=setup)
-    old_music_detector = music_detection.main_detection.get_detector(old_train_folder,
-                                                                     old_db_folder, setup=True)
-    # music_detection.main_detection.detection_logic(train_folder, db_folder, test_folders,
-    #                                              setup=setup, detector=music_detector)
-
-    single_note_midi_main_logic(music_detector, 100, 150, "/home/ido4848/Music/classic_created150_v2.mp3", "mp3",
-                                freq_stats=1)
-    single_note_midi_main_logic(old_music_detector, 100, 150, "/home/ido4848/Music/created150.mp3", "mp3",
-                                freq_stats=1)
-    single_note_midi_main_logic(music_detector, 100, 500, "/home/ido4848/Music/classic_created500.mp3", "mp3",
-                                freq_stats=20)
-    single_note_midi_main_logic(old_music_detector, 100, 500, "/home/ido4848/Music/created500.mp3", "mp3",
-                                freq_stats=1)
-    single_note_midi_main_logic(music_detector, 100, 1000, "/home/ido4848/Music/classic_created1000.mp3", "mp3",
-                                freq_stats=50)
-    single_note_midi_main_logic(old_music_detector, 100, 1000, "/home/ido4848/Music/created1000.mp3", "mp3",
-                                freq_stats=1)
-    single_note_midi_main_logic(music_detector, 200, 1000, "/home/ido4848/Music/classic_created1000_2.mp3", "mp3",
-                                freq_stats=50)
-    single_note_midi_main_logic(old_music_detector, 200, 1000, "/home/ido4848/Music/created1000_2.mp3", "mp3",
-                                freq_stats=1)
-    single_note_midi_main_logic(music_detector, 100, 10000, "/home/ido4848/Music/classic_created10000.mp3", "mp3",
-                                freq_stats=200)
-    single_note_midi_main_logic(old_music_detector, 100, 10000, "/home/ido4848/Music/created10000.mp3", "mp3",
-                                freq_stats=1)
-    single_note_midi_main_logic(music_detector, 100, 100000, "/home/ido4848/Music/classic_created100000.mp3", "mp3",
-                                freq_stats=1000)
-    single_note_midi_main_logic(old_music_detector, 100, 100000, "/home/ido4848/Music/created100000.mp3", "mp3",
-                                freq_stats=1)
-
-'''

@@ -5,7 +5,6 @@ import detection
 from util_modules import saving as saver
 from util_modules import logging as logger
 
-# TODO: STILL A SAVE BUG, SAVE DATA INSTEAD OF DETECTOR
 def main_logic(functions, positive_folder, iterations, freq_stats, item_path,
                data_path=None, setup=True, verbose=True):
     if verbose:
