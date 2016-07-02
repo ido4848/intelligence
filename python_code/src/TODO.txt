@@ -3,3 +3,5 @@ Detector saving
 better logging
 
 multiple class clf
+
+look for TODOS

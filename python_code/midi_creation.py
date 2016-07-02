@@ -23,12 +23,10 @@ def get_midi_functions(duration_seconds):
 
     functions = {}
 
-    # item is music21.midi.Stream
+    # item is music21.stream.Stream
 
     def path_to_item(path):
-        item = music21.midi.translate.midiFilePathToStream(path)
-        print item, type(item)
-        return item
+        return music21.midi.translate.midiFilePathToStream(path)
 
     def item_to_features(item):
         f = music21.features.base.allFeaturesAsList(item)
@@ -95,12 +93,12 @@ def midi_main():
     positive_folder = "/home/ido4848/Music/train/midi_train"
     iterations = 3
     freq_stats = 1
-    item_path = "/home/ido4848/Music/create_midi_6.mid"
+    item_path = "/home/ido4848/Music/create_midi_8.mid"
     data_path = "/home/ido4848/DB/midi_test_data"  # TODO: A BUG HERE
-    duration_seconds = 7
+    duration_seconds = 5
     functions = get_midi_functions(duration_seconds)
     verbose = True
-    setup = True
+    setup = False
 
     src.intelligent_logic.main_logic(functions, positive_folder, iterations, freq_stats, item_path,
                                      data_path=data_path, setup=setup, verbose=verbose)
