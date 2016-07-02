@@ -1,65 +1,118 @@
-import pydub
+import music21
 from pyevolve import G1DList
-import music_creation
-import music_detection
-import os
+import src.intelligent_logic
 
 
-def single_note_midi_main_logic(music_detector, note_count, iterations, song_path, song_format, freq_stats=0):
-    genome = G1DList.G1DList(note_count)
-
-    # Sets the range max and min of the 1D List
-    genome.setParams(rangemin=40, rangemax=80)
-
-    def to_song_object(raw_g1d_song):
-        try:
-            os.remove("temp_midi.midi")
-        except OSError:
-            pass
-        try:
-            os.remove("temp_midi.wav")
-        except OSError:
-            pass
-
-        midi_object = music_creation.midi_creation.create_midi_from_pitches(raw_g1d_song.genomeList)
-        music_creation.midi_creation.save_midi(midi_object, "temp_midi.midi")
-        timidity_command = r"timidity {} -Ow -o {} 1> \dev\null 2> \dev\null ".format("temp_midi.midi", "temp_midi.wav")
-        temp = os.system(timidity_command)
-        song_object = pydub.AudioSegment.from_wav("temp_midi.wav")
-        return song_object, "pydub"
-
-    creator = music_creation.music_creator.MusicCreator(music_detector, genome, to_song_object)
-    best_genome = creator.create(iterations, freq_stats=freq_stats)
-    print best_genome.genomeList
-    best_song, best_song_type = to_song_object(best_genome)
-    best_song.export(song_path, song_format)
+'''
+functions should contain
+def path_to_item(path)
+def item_to_features(item)
+def genome_to_item(genome)
+def save_item(item, save_path)
+def get_item_genome()
+'''
 
 
-def raw_main_logic(music_detector, duration_seconds, iterations, song_path, song_format, freq_stats=0):
-    frame_rate = 44100
-    channels = 2
-    sample_width = 2
+def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [l]
 
-    nframes = frame_rate * channels * sample_width * duration_seconds
-    genome = G1DList.G1DList(nframes)
 
-    # Sets the range max and min of the 1D List
-    genome.setParams(rangemin=0, rangemax=255)
+def get_midi_functions(duration_seconds):
+    tempo = 120
+    min = 20
+    max = 100
+    note_count = tempo * duration_seconds / 60
 
-    def to_song_object(raw_g1d_song):
-        raw_song = raw_g1d_song.genomeList
-        raw_song = ''.join([chr(c) for c in raw_song])
-        with open("temp.raw", "wb") as f:
-            f.write(raw_song)
-        song_object = pydub.AudioSegment.from_raw("temp.raw", channels=channels, frame_rate=frame_rate,
-                                                  sample_width=sample_width)
-        return song_object, "pydub"
+    functions = {}
 
-    creator = music_creation.music_creator.MusicCreator(music_detector, genome, to_song_object)
-    best_genome = creator.create(iterations, freq_stats=freq_stats)
-    best_song, best_song_type = to_song_object(best_genome)
-    best_song.export(song_path, song_format)
+    # item is music21.midi.Stream
 
+    def path_to_item(path):
+        return music21.midi.translate.midiFilePathToStream(path)
+
+    def item_to_features(item):
+        f = music21.features.base.allFeaturesAsList(item)
+        return flatten(f[0] + f[1])
+
+    def genome_to_item(genome):
+        pitch_lst = genome.genomeList
+        mt = music21.midi.MidiTrack(1)
+        stream = music21.stream.Stream()
+        track = 0
+        time = 0
+        channel = 0
+        duration = 1
+        quarter_duration = 1024
+        volume = 100
+        tempo = 120  # TODO:?
+
+        for pitch in pitch_lst:
+            dt1 = music21.midi.DeltaTime(mt)
+            dt1.time = time * quarter_duration
+
+            me_on = music21.midi.MidiEvent(mt)
+            me_on.type = "NOTE_ON"
+            me_on.pitch = pitch
+            me_on.velocity = volume
+
+            dt2 = music21.midi.DeltaTime(mt)
+            dt2.time = (time + duration) * quarter_duration
+
+            me_off = music21.midi.MidiEvent(mt)
+            me_off.type = "NOTE_OFF"
+            me_off.pitch = pitch
+            me_off.velocity = 0
+
+            note = music21.midi.translate.midiEventsToNote([dt1, me_on, dt2, me_off])
+            time += duration
+            stream.append(note)
+
+        return stream
+
+    def save_item(item, save_path):
+        midi_file = music21.midi.translate.streamToMidiFile(item)
+        binfile = open(save_path, 'wb')
+        binfile.write(midi_file.writestr())
+        binfile.close()
+
+    def get_item_genome():
+        genome = G1DList.G1DList(note_count)
+
+        # Sets the range max and min of the 1D List
+        genome.setParams(rangemin=20, rangemax=100)
+        return genome
+
+    functions['path_to_item'] = path_to_item
+    functions['item_to_features'] = item_to_features
+    functions['genome_to_item'] = genome_to_item
+    functions['save_item'] = save_item
+    functions['get_item_genome'] = get_item_genome
+
+    return functions
+
+
+def midi_main():
+    positive_folder = "/home/ido4848/Music/train/midi_train"
+    iterations = 3
+    freq_stats = 1
+    item_path = "/home/ido4848/Music/create_midi_3.mid"
+    detector_path = None  # TODO: A BUG HERE
+    duration_seconds = 7
+    functions = get_midi_functions(duration_seconds)
+    verbose = True
+    setup = True
+
+    src.intelligent_logic.main_logic(functions, positive_folder, iterations, freq_stats, item_path,
+                                                detector_path=detector_path, setup=setup, verbose=verbose)
+
+
+def main():
+    midi_main()
+
+
+if __name__ == "__main__":
+    main()
+
+'''
 
 def main():
     setup = False
@@ -106,15 +159,4 @@ def main():
     single_note_midi_main_logic(old_music_detector, 100, 100000, "/home/ido4848/Music/created100000.mp3", "mp3",
                                 freq_stats=1)
 
-
-def save_midi_from_lst(lst, file_name, file_type):
-    midi_object = music_creation.midi_creation.create_midi_from_pitches(lst)
-    music_creation.midi_creation.save_midi(midi_object, "temp_midi.midi")
-    timidity_command = r"timidity {} -Ow -o {} 1> \dev\null 2> \dev\null ".format("temp_midi.midi", "temp_midi.wav")
-    temp = os.system(timidity_command)
-    song_object = pydub.AudioSegment.from_wav("temp_midi.wav")
-    song_object.export(file_name, file_type)
-
-
-if __name__ == "__main__":
-    main()
+'''

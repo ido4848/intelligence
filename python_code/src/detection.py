@@ -1,5 +1,6 @@
-from lsanomaly import LSAnomaly
 import numpy as np
+
+from outer_modules.lsanomaly import LSAnomaly
 
 
 class Detector(object):
@@ -34,14 +35,14 @@ class Detector(object):
         test_data = self._item_to_features(item)
 
         try:
-            pred = self._regressioner.predict_proba(np.array([test_data]))
+            pred = self._clf.predict_proba(np.array([test_data]))
             return pred[0][0]
         except Exception as e:
             if self._verbose:
                 print "Could not predict_proba, moving to regular predict"
 
         try:
-            pred = self._regressioner.predict(np.array([test_data]))
+            pred = self._clf.predict(np.array([test_data]))
             return pred[0]
         except Exception as e:
             raise e
