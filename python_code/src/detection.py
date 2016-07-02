@@ -1,6 +1,7 @@
 import numpy as np
 
 from outer_modules.lsanomaly import LSAnomaly
+from util_modules import logging as logger
 
 
 class Detector(object):
@@ -24,12 +25,15 @@ class Detector(object):
                 train_data.append(self._item_to_features(item))
             except Exception as e:
                 if self._verbose:
-                    print "Could not extract features from item: {}".format(e.message)
+                    logger.log("Could not extract features from item: {}".format(e.message))
 
         try:
             self._clf.fit(np.array(train_data))
         except Exception as e:
             raise e
+
+        if self._verbose:
+            logger.log("Detector was trained using {} items".format(len(train_data)))
 
     def detect(self, item):
         test_data = self._item_to_features(item)
@@ -39,7 +43,7 @@ class Detector(object):
             return pred[0][0]
         except Exception as e:
             if self._verbose:
-                print "Could not predict_proba, moving to regular predict"
+                logger.log("Could not predict_proba, moving to regular predict, with error: ".format(e.message))
 
         try:
             pred = self._clf.predict(np.array([test_data]))

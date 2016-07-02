@@ -94,7 +94,7 @@ def midi_main():
     positive_folder = "/home/ido4848/Music/train/midi_train"
     iterations = 3
     freq_stats = 1
-    item_path = "/home/ido4848/Music/create_midi_3.mid"
+    item_path = "/home/ido4848/Music/create_midi_5.mid"
     detector_path = None  # TODO: A BUG HERE
     duration_seconds = 7
     functions = get_midi_functions(duration_seconds)
