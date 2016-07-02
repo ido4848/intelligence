@@ -68,14 +68,14 @@ def mp3_main():
     iterations = 3
     freq_stats = 1
     item_path = "/home/ido4848/Music/created_new_mp3.mp3"
-    detector_path = None  # "/home/ido4848/DB/mp3_old_train" # TODO: A BUG HERE
+    data_path = None  # "/home/ido4848/DB/mp3_old_train"
     duration_seconds = 12
     functions = get_mp3_functions(duration_seconds)
     verbose = True
     setup = True
 
     src.intelligent_logic.main_logic(functions, positive_folder, iterations, freq_stats, item_path,
-                                     detector_path=detector_path, setup=setup, verbose=verbose)
+                                     data_path=data_path, setup=setup, verbose=verbose)
 
 
 def main():

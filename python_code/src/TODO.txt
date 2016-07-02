@@ -1,3 +1,5 @@
 Detector saving
 
+better logging
+
 multiple class clf

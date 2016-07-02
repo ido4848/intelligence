@@ -2,7 +2,6 @@ import music21
 from pyevolve import G1DList
 import src.intelligent_logic
 
-
 '''
 functions should contain
 def path_to_item(path)
@@ -27,7 +26,9 @@ def get_midi_functions(duration_seconds):
     # item is music21.midi.Stream
 
     def path_to_item(path):
-        return music21.midi.translate.midiFilePathToStream(path)
+        item = music21.midi.translate.midiFilePathToStream(path)
+        print item, type(item)
+        return item
 
     def item_to_features(item):
         f = music21.features.base.allFeaturesAsList(item)
@@ -94,15 +95,15 @@ def midi_main():
     positive_folder = "/home/ido4848/Music/train/midi_train"
     iterations = 3
     freq_stats = 1
-    item_path = "/home/ido4848/Music/create_midi_5.mid"
-    detector_path = None  # TODO: A BUG HERE
+    item_path = "/home/ido4848/Music/create_midi_6.mid"
+    data_path = "/home/ido4848/DB/midi_test_data"  # TODO: A BUG HERE
     duration_seconds = 7
     functions = get_midi_functions(duration_seconds)
     verbose = True
     setup = True
 
     src.intelligent_logic.main_logic(functions, positive_folder, iterations, freq_stats, item_path,
-                                                detector_path=detector_path, setup=setup, verbose=verbose)
+                                     data_path=data_path, setup=setup, verbose=verbose)
 
 
 def main():

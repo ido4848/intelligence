@@ -7,28 +7,29 @@ from util_modules import logging as logger
 
 
 def main_logic(functions, positive_folder, iterations, freq_stats, item_path,
-               detector_path=None, setup=True, verbose=True):
+               data_path=None, setup=True, verbose=True):
     if verbose:
         logger.log("Starting to perform main logic.")
-    detector = None
+        positive_set = None
     if setup:
         positive_set = crawling.FolderCrawler.crawl(positive_folder, functions['path_to_item'])
         if verbose:
             logger.log("Crawling ended.")
-        detector = detection.Detector(positive_set, None, functions['item_to_features'])
-        if verbose:
-            logger.log("Detector creation has ended.")
-        if detector_path is not None:
-            saver.save(detector, detector_path)
+        if data_path is not None:
+            saver.save(positive_set, data_path)
             if verbose:
-                logger.log("Detector was saved.")
-    elif detector_path is not None:
-        detector = saver.load(detector_path)
+                logger.log("Crawled data was saved.")
+    elif data_path is not None:
+        positive_set = saver.load(data_path)
         if verbose:
-            logger.log("Detector was loaded from file.")
+            logger.log("Crawled data was loaded from file.")
     else:
-        logger.log("Could not get detector, as setup is False and there is no saved detector.")
+        logger.log("Could not get crawled data, as setup is False and there is no saved data.")
         return
+
+    detector = detection.Detector(positive_set, None, functions['item_to_features'])
+    if verbose:
+        logger.log("Detector creation has ended.")
 
     creator = creation.Creator(detector, functions['get_item_genome'], functions['genome_to_item'])
     if verbose:
@@ -40,3 +41,6 @@ def main_logic(functions, positive_folder, iterations, freq_stats, item_path,
     functions['save_item'](best_item, item_path)
     if verbose:
         logger.log("Best item was saved.")
+
+    if verbose:
+        logger.log("Finished performing main logic.")
