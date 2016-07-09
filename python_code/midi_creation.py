@@ -98,31 +98,31 @@ def midi_main(duration_seconds, iterations, freq_stats, positive_folder, data_pa
 
 def main():
     train_folder = "/home/ido4848/Music/train/midi_classical_train"
-    db_folder = "/home/ido4848/DB/midi_classical_data"
+    db_path = "/home/ido4848/DB/midi_classical_data"
     product_folder = "/home/ido4848/Music"
 
-    midi_main(5, 3, 1, train_folder, db_folder,
+    midi_main(5, 3, 1, train_folder, db_path,
               product_folder + "/classical_created_midi_1.mid", setup=True)
 
-    midi_main(15, 30, 5, None, db_folder,
+    midi_main(15, 30, 5, None, db_path,
               product_folder + "/classical_created_midi_2.mid", setup=False)
 
-    midi_main(30, 50, 10, None, db_folder,
+    midi_main(30, 50, 10, None, db_path,
               product_folder + "/classical_created_midi_3.mid", setup=False)
 
-    midi_main(30, 100, 20, None, db_folder,
+    midi_main(30, 100, 20, None, db_path,
               product_folder + "/classical_created_midi_4.mid", setup=False)
 
-    midi_main(60, 100, 20, None, db_folder,
+    midi_main(60, 100, 20, None, db_path,
               product_folder + "/classical_created_midi_5.mid", setup=False)
 
-    midi_main(60, 200, 20, None, db_folder,
+    midi_main(60, 200, 20, None, db_path,
               product_folder + "/classical_created_midi_6.mid", setup=False)
 
-    midi_main(60, 500, 50, None, db_folder,
+    midi_main(60, 500, 50, None, db_path,
               product_folder + "/classical_created_midi_7.mid", setup=False)
 
-    midi_main(100, 1000, 100, None, db_folder,
+    midi_main(100, 1000, 100, None, db_path,
               product_folder + "/classical_created_midi_8.mid", setup=False)
 
 
