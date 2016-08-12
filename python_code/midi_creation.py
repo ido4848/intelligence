@@ -266,8 +266,18 @@ def pro_main():
     product_folder = "/home/ido4848/Music"
 
 
-    midi_level2_main(58, 50, 5000, 50, train_folder, db_path, detector_path,
-              product_folder + "/classical_created_midi_level2_13.mid", setup=False)
+    midi_level2_main(58, 60, 5000, 50, train_folder, db_path, detector_path,
+              product_folder + "/classical_created_midi_level2_14.mid", setup=False)
+
+    midi_level2_main(50, 60, 10000, 50, train_folder, db_path, detector_path,
+              product_folder + "/classical_created_midi_level2_15.mid", setup=False)
+
+    midi_level2_main(55, 60, 15000, 50, train_folder, db_path, detector_path,
+              product_folder + "/classical_created_midi_level2_16.mid", setup=False)
+
+    midi_level2_main(60, 60, 20000, 50, train_folder, db_path, detector_path,
+              product_folder + "/classical_created_midi_level2_17.mid", setup=False)
+
 
 
 if __name__ == "__main__":
