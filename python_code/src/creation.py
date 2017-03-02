@@ -30,7 +30,7 @@ class Creator(object):
         # the termination criteria
         ga.selector.set(Selectors.GRouletteWheel)
         ga.setGenerations(iterations)
-        ga.terminationCriteria.set(GSimpleGA.ConvergenceCriteria)
+        #ga.terminationCriteria.set(GSimpleGA.ConvergenceCriteria)
 
         # Sets the DB Adapter, the resetDB flag will make the Adapter recreate
         # the database and erase all data every run, you should use this flag
