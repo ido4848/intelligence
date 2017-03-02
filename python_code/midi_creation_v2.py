@@ -8,6 +8,7 @@ from music21.note import Note, Rest
 from music21.duration import Duration
 from music21 import instrument
 from music21.volume import Volume
+from music21.midi.realtime import StreamPlayer
 import inspect
 
 
@@ -31,7 +32,7 @@ class RandomList(object):
         val = self.lst[self.index] * (minMaxDict['max'] - minMaxDict['min']) + minMaxDict['min']
         self.index += 1
         if isInt:
-            return round(val)
+            return int(round(val))
         return val
 
 
@@ -49,15 +50,15 @@ def get_midi_functions():
     NOTE = {'min':36, 'max': 61}
     NUM_OF_NOTES = {'min':1, 'max':6}
     DURATION = {'min':0.125, 'max':4.0}
-    VELOCITY = {'min':10, 'max':100}
+    VELOCITY = {'min':60, 'max':100}
 
     NUM_OF_PARTS = {'min':1, 'max':20}
-    LENGTH = {'min':50, 'max':100}
+    LENGTH = {'min':20, 'max':40}
 
     # note/rest + duration + velocity + num of notes + notes
     NOTE_SIZE = 1 + 1 + 1 + 1 + NUM_OF_NOTES['max']
 
-    # instrument + notes
+    # instrument + note
     PART_SIZE = 1 + LENGTH['max'] * NOTE_SIZE
 
     # length + num of parts + parts
@@ -97,38 +98,41 @@ def get_midi_functions():
 
     def get_random_part(length, random_lst):
         part = Part()
-        instrument_index = random_lst.rand({'min':0, 'max':len(INSTRUMENTS_CLASSES)})
+        instrument_index = random_lst.rand({'min':0, 'max':len(INSTRUMENTS_CLASSES) - 1})
         instrument_class = INSTRUMENTS_CLASSES[instrument_index]
         set_instrument(part, instrument_class())
         for _ in range(length):
             notePred = random_lst.rand({'min':0, 'max':1}, isInt=False)
-            isNote = True
             duration = random_lst.rand(DURATION, isInt=False)
-            if notePred < 0.5:
-                isNote = False
+            isNote = notePred > 0.2
             if isNote:
                 num_of_notes = random_lst.rand(NUM_OF_NOTES)
                 velocity = random_lst.rand(VELOCITY)
                 notes = []
-                for _ in notes:
+                for _ in range(num_of_notes):
                     note = random_lst.rand(NOTE)
                     notes.append(note)
+                append_chord(part, notes, duration, velocity)
             else:
                 append_rest(part, duration)
         return part
 
     def genome_to_item(genome):
-        print genome
-        random_lst = RandomList(genome)
+        random_lst = RandomList(genome.genomeList)
         length = random_lst.rand(LENGTH)
         num_of_parts = random_lst.rand(NUM_OF_PARTS)
         parts = []
         for _ in range(num_of_parts):
             parts.append(get_random_part(length, random_lst))
 
-        return Stream(parts)
+        stream = Stream(parts)
+        return stream
 
     def save_item(item, save_path):
+        for el in item.recurse():
+            print el
+        sp = StreamPlayer(item)
+        sp.play()
         midi_file = music21.midi.translate.streamToMidiFile(item)
         binfile = open(save_path, 'wb')
         binfile.write(midi_file.writestr())
@@ -155,8 +159,17 @@ def main():
     detector_path = "/home/ido/DB/midi_compact_beethoven_detector"
     product_folder = "/home/ido/Music"
 
-    midi_main(10, 1, train_folder, db_path, detector_path,
+    midi_main(1, 1, train_folder, db_path, detector_path,
               product_folder + "/compact_beethoven_created_1.mid", setup=True)
+
+    midi_main(10, 1, train_folder, db_path, detector_path,
+              product_folder + "/compact_beethoven_created_2.mid", setup=False)
+
+    midi_main(100, 1, train_folder, db_path, detector_path,
+              product_folder + "/compact_beethoven_created_3.mid", setup=False)
+
+    midi_main(1000, 1, train_folder, db_path, detector_path,
+              product_folder + "/compact_beethoven_created_4.mid", setup=False)
 
 def test_main():
     train_folder = "/home/ido/Music/train/midi_test_train"
@@ -164,8 +177,8 @@ def test_main():
     detector_path = "/home/ido/DB/midi_test_detector"
     product_folder = "/home/ido/Music"
 
-    midi_main(10, 1, train_folder, db_path, detector_path,
-              product_folder + "/test_created_1.mid", setup=True)
+    midi_main(1, 1, train_folder, db_path, detector_path,
+              product_folder + "/test_created_4.mid", setup=False)
 
 if __name__ == "__main__":
     test_main()
