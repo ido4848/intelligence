@@ -68,25 +68,28 @@ def create_folder_if_needed(folder_path):
 
 def generic_main(executions_args):
     for arg in executions_args:
-        product_name = arg['data_name'] + "_created"
+        product_name = arg['data_name'] + "_created_" + arg['index']
+        data_name = arg['data_name'] + "_data"
+        detector_name = arg['data_name'] + "_detector"
+
         time_path = datetime.datetime.now().strftime("/%y_%m_%d/%H_%M_%S")
+        train_folder_path = arg['home_folder'] + arg['type_folder'] + "/train/" + arg['train_name']
 
-        db_folder_path = arg['home_folder'] + "/DB/intelligent_data"
-        detector_folder_path = arg['home_folder'] + "/DB/intelligent_detector"
-        product_folder_path = arg['home_folder'] + arg['type_folder'] + time_path
+        db_folder_path = arg['home_folder'] + "/DB/intelligent_data/" + data_name
+        detector_folder_path = arg['home_folder'] + "/DB/intelligent_detectors/" + detector_name
+        product_folder_path = arg['home_folder'] + arg['type_folder'] + time_path + "/" + product_name
 
-        train_folder_path = arg['home_folder'] + arg['type_folder'] + "/train/" + arg['data_name']
-        db_path = db_folder_path + "/" + arg['data_name'] + "_data"
-        detector_path = detector_folder_path + "/" + arg['data_name'] + "_detector"
-        product_path = "{}{}_{}.{}".format(product_folder_path, product_name, arg['index'], arg['file_extension'])
+        db_file_path = db_folder_path + "/" + detector_name
+        detector_file_path = detector_folder_path + "/" + data_name
+        product_file_path = product_folder_path + "/" + product_name + "." + arg['file_extension']
 
         create_folder_if_needed(db_folder_path)
         create_folder_if_needed(detector_folder_path)
         create_folder_if_needed(product_folder_path)
 
-        main_logic(arg['functions'], train_folder_path, arg['iterations'], arg['freq_stats'], product_path,
-                   data_path=db_path,
-                   detector_path=detector_path, setup=arg['setup'], verbose=arg['verbose'])
+        main_logic(arg['functions'], train_folder_path, arg['iterations'], arg['freq_stats'], product_file_path,
+                   data_path=db_file_path,
+                   detector_path=detector_file_path, setup=arg['setup'], verbose=arg['verbose'])
 
 
 def generic_type_main(execution_args, home_folder, type_folder, file_extension, functions):
@@ -95,5 +98,5 @@ def generic_type_main(execution_args, home_folder, type_folder, file_extension, 
         arg['type_folder'] = type_folder
         arg['file_extension'] = file_extension
         arg['functions'] = functions
-        arg['index'] = j + 1
+        arg['index'] = str(j + 1)
     generic_main(execution_args)
