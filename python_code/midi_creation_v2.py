@@ -138,8 +138,6 @@ def get_midi_functions():
 
         for el in item.recurse():
             print el
-        sp = StreamPlayer(item)
-        sp.play()
 
     functions['path_to_item'] = path_to_item
     functions['item_to_features'] = item_to_features
