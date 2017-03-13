@@ -11,7 +11,6 @@ from music21.volume import Volume
 from music21.midi.realtime import StreamPlayer
 import inspect
 
-
 '''
 functions should contain
 def path_to_item(path)
@@ -21,7 +20,9 @@ def save_item(item, save_path)
 def get_item_genome()
 '''
 
+
 def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [l]
+
 
 class RandomList(object):
     def __init__(self, lst):
@@ -47,13 +48,13 @@ def get_midi_functions():
             if issubclass(instrument_class, instrument.Instrument):
                 INSTRUMENTS_CLASSES.append(instrument_class)
 
-    NOTE = {'min':36, 'max': 61}
-    NUM_OF_NOTES = {'min':1, 'max':6}
-    DURATION = {'min':0.125, 'max':4.0}
-    VELOCITY = {'min':60, 'max':100}
+    NOTE = {'min': 36, 'max': 61}
+    NUM_OF_NOTES = {'min': 1, 'max': 6}
+    DURATION = {'min': 0.125, 'max': 4.0}
+    VELOCITY = {'min': 70, 'max': 100}
 
-    NUM_OF_PARTS = {'min':1, 'max':20}
-    LENGTH = {'min':20, 'max':40}
+    NUM_OF_PARTS = {'min': 1, 'max': 20}
+    LENGTH = {'min': 10, 'max': 20}
 
     # note/rest + duration + velocity + num of notes + notes
     NOTE_SIZE = 1 + 1 + 1 + 1 + NUM_OF_NOTES['max']
@@ -64,6 +65,7 @@ def get_midi_functions():
     # length + num of parts + parts
     GENOME_SIZE = 1 + 1 + NUM_OF_PARTS['max'] * PART_SIZE
 
+    BLA = 0
 
     def path_to_item(path):
         return music21.midi.translate.midiFilePathToStream(path)
@@ -98,11 +100,11 @@ def get_midi_functions():
 
     def get_random_part(length, random_lst):
         part = Part()
-        instrument_index = random_lst.rand({'min':0, 'max':len(INSTRUMENTS_CLASSES) - 1})
+        instrument_index = random_lst.rand({'min': 0, 'max': len(INSTRUMENTS_CLASSES) - 1})
         instrument_class = INSTRUMENTS_CLASSES[instrument_index]
         set_instrument(part, instrument_class())
         for _ in range(length):
-            notePred = random_lst.rand({'min':0, 'max':1}, isInt=False)
+            notePred = random_lst.rand({'min': 0, 'max': 1}, isInt=False)
             duration = random_lst.rand(DURATION, isInt=False)
             isNote = notePred > 0.2
             if isNote:
@@ -118,6 +120,7 @@ def get_midi_functions():
         return part
 
     def genome_to_item(genome):
+
         random_lst = RandomList(genome.genomeList)
         length = random_lst.rand(LENGTH)
         num_of_parts = random_lst.rand(NUM_OF_PARTS)
@@ -129,14 +132,15 @@ def get_midi_functions():
         return stream
 
     def save_item(item, save_path):
-        for el in item.recurse():
-            print el
-        sp = StreamPlayer(item)
-        sp.play()
         midi_file = music21.midi.translate.streamToMidiFile(item)
         binfile = open(save_path, 'wb')
         binfile.write(midi_file.writestr())
         binfile.close()
+
+        for el in item.recurse():
+            print el
+        sp = StreamPlayer(item)
+        sp.play()
 
     functions['path_to_item'] = path_to_item
     functions['item_to_features'] = item_to_features
@@ -147,38 +151,40 @@ def get_midi_functions():
     return functions
 
 
-def midi_main(iterations, freq_stats, positive_folder, data_path, detector_path, item_path, setup=False,
-              verbose=True):
-    functions = get_midi_functions()
-    src.intelligent_logic.main_logic(functions, positive_folder, iterations, freq_stats, item_path,
-                                     data_path=data_path, detector_path=detector_path, setup=setup, verbose=verbose)
-
 def main():
-    train_folder = "/home/ido/Music/train/midi_compact_beethoven_train"
-    db_path = "/home/ido/DB/midi_compact_beethoven_data"
-    detector_path = "/home/ido/DB/midi_compact_beethoven_detector"
-    product_folder = "/home/ido/Music"
+    '''
+    home_folder : /home/ido
+    type_folder : Music
+    file_extension
+    functions
+    index (auto)
 
-    midi_main(1, 1, train_folder, db_path, detector_path,
-              product_folder + "/compact_beethoven_created_1.mid", setup=True)
+    data_name: midi_compcat_beethoven
+    iterations
+    freq_stats
+    setup
+    verbose
+    '''
 
-    midi_main(10, 1, train_folder, db_path, detector_path,
-              product_folder + "/compact_beethoven_created_2.mid", setup=False)
+    home_folder = "/home/ido"
+    type_folder = "/Music"
+    file_extension = "mid"
+    functions = get_midi_functions()
 
-    midi_main(100, 1, train_folder, db_path, detector_path,
-              product_folder + "/compact_beethoven_created_3.mid", setup=False)
+    data_name = "midi_test_train"
+    executions_args = []
+    executions_args.append({'iterations': 1, 'freq_stats': 1, 'setup': True, 'data_name': data_name, 'verbose': True})
+    executions_args.append({'iterations': 5, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'verbose': True})
+    executions_args.append({'iterations': 10, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'verbose': True})
+    src.intelligent_logic.generic_type_main(executions_args, home_folder, type_folder, file_extension, functions)
 
-    midi_main(1000, 1, train_folder, db_path, detector_path,
-              product_folder + "/compact_beethoven_created_4.mid", setup=False)
-
-def test_main():
-    train_folder = "/home/ido/Music/train/midi_test_train"
-    db_path = "/home/ido/DB/midi_test_data"
-    detector_path = "/home/ido/DB/midi_test_detector"
-    product_folder = "/home/ido/Music"
-
-    midi_main(1, 1, train_folder, db_path, detector_path,
-              product_folder + "/test_created_4.mid", setup=False)
 
 if __name__ == "__main__":
-    test_main()
+    main()
+
+'''
+split big midis (smart split?)
+create small midis
+constants? (midi length, instruments number, what instruments)
+info file
+'''
