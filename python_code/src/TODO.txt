@@ -2,4 +2,8 @@ better logging
 
 multiple class clf
 
+info file for each created
+more generic saver?
+crawl the web?
+
 look for TODOS

@@ -187,8 +187,11 @@ if __name__ == "__main__":
     main()
 
 '''
+TODO:
 split big midis (smart split?)
 create small midis
 constants? (midi length, instruments number, what instruments)
-info file
+info file for each created
+more generic saver?
+crawl the web?
 '''
