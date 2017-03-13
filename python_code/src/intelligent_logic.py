@@ -1,4 +1,5 @@
 import time
+import datetime
 
 import crawling
 import creation
@@ -6,6 +7,7 @@ import detection
 
 from util_modules import saving as saver
 from util_modules import logging as logger
+
 
 def main_logic(functions, positive_folder, iterations, freq_stats, item_path,
                data_path=None, detector_path=None, setup=True, verbose=True):
@@ -56,3 +58,28 @@ def main_logic(functions, positive_folder, iterations, freq_stats, item_path,
     end_time = time.time()
     if verbose:
         logger.log("It took {} seconds".format(end_time - start_time))
+
+
+def generic_main(executions_args):
+    for arg in executions_args:
+        time_path = datetime.datetime.now().strftime("/%y_%m_%d/%H_%M_%S")
+        train_folder = arg['home_folder'] + arg['type_folder'] + "/train/" + arg['data_name']
+        db_path = arg['home_folder'] + "/DB/intelligent_data/" + arg['data_name'] + "_data"
+        detector_path = arg['home_folder'] + "/DB/intelligent_detector/" + arg['data_name'] + "_detector"
+        product_folder = arg['home_folder'] + arg['type_folder'] + time_path
+        product_name = arg['data_name'] + "_created"
+
+        main_logic(arg['functions'], train_folder, arg['iterations'], arg['freq_stats'],
+                   "{}{}_{}.{}".format(product_folder, product_name, arg['index'], arg['file_extension']),
+                   data_path=db_path,
+                   detector_path=detector_path, setup=arg['setup'], verbose=arg['verbose'])
+
+
+def generic_type_main(execution_args, home_folder, type_folder, file_extension, functions):
+    for j, arg in enumerate(execution_args):
+        arg['home_folder'] = home_folder
+        arg['type_folder'] = type_folder
+        arg['file_extension'] = file_extension
+        arg['functions'] = functions
+        arg['index'] = j + 1
+    generic_main(execution_args)
