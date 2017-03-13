@@ -48,7 +48,7 @@ def get_midi_functions():
             if issubclass(instrument_class, instrument.Instrument):
                 INSTRUMENTS_CLASSES.append(instrument_class)
 
-    NOTE = {'min': 36, 'max': 61}
+    PITCH = {'min': 36, 'max': 61}
     NUM_OF_NOTES = {'min': 1, 'max': 6}
     DURATION = {'min': 0.125, 'max': 4.0}
     VELOCITY = {'min': 70, 'max': 100}
@@ -112,7 +112,7 @@ def get_midi_functions():
                 velocity = random_lst.rand(VELOCITY)
                 notes = []
                 for _ in range(num_of_notes):
-                    note = random_lst.rand(NOTE)
+                    note = random_lst.rand(PITCH)
                     notes.append(note)
                 append_chord(part, notes, duration, velocity)
             else:
@@ -154,7 +154,6 @@ def main():
     type_folder : /Music
     file_extension
     functions
-    index (auto)
 
     data_name: midi_compcat_beethoven
     iterations
@@ -165,6 +164,7 @@ def main():
 
     home_folder = "/home/ido"
     type_folder = "/Music"
+    type_name = "music"
     file_extension = "mid"
     functions = get_midi_functions()
 
@@ -172,7 +172,7 @@ def main():
     train_name = "midi_test"
     executions_args = []
     executions_args.append(
-        {'iterations': 1, 'freq_stats': 1, 'setup': True, 'data_name': data_name, 'train_name': train_name,
+        {'iterations': 1, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
          'verbose': True})
     executions_args.append(
         {'iterations': 5, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
@@ -180,7 +180,7 @@ def main():
     executions_args.append(
         {'iterations': 10, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
          'verbose': True})
-    src.intelligent_logic.generic_type_main(executions_args, home_folder, type_folder, file_extension, functions)
+    src.intelligent_logic.generic_type_main(executions_args, home_folder, type_name, type_folder, file_extension, functions)
 
 
 if __name__ == "__main__":

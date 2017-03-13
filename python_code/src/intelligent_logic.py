@@ -68,7 +68,7 @@ def create_folder_if_needed(folder_path):
 
 def generic_main(executions_args):
     for arg in executions_args:
-        product_name = arg['data_name'] + "_created_" + arg['index']
+        product_name = arg['data_name'] + "_created"
         data_name = arg['data_name'] + "_data"
         detector_name = arg['data_name'] + "_detector"
 
@@ -77,7 +77,8 @@ def generic_main(executions_args):
 
         db_folder_path = arg['home_folder'] + "/DB/intelligent_data/" + data_name
         detector_folder_path = arg['home_folder'] + "/DB/intelligent_detectors/" + detector_name
-        product_folder_path = arg['home_folder'] + arg['type_folder'] + time_path + "/" + product_name
+        product_folder_path = arg['home_folder'] + arg['type_folder'] + "/intelligent_" + arg[
+            'type_name'] + time_path + "/" + product_name
 
         db_file_path = db_folder_path + "/" + detector_name
         detector_file_path = detector_folder_path + "/" + data_name
@@ -92,11 +93,11 @@ def generic_main(executions_args):
                    detector_path=detector_file_path, setup=arg['setup'], verbose=arg['verbose'])
 
 
-def generic_type_main(execution_args, home_folder, type_folder, file_extension, functions):
-    for j, arg in enumerate(execution_args):
+def generic_type_main(execution_args, home_folder, type_name, type_folder, file_extension, functions):
+    for arg in execution_args:
         arg['home_folder'] = home_folder
+        arg['type_name'] = type_name
         arg['type_folder'] = type_folder
         arg['file_extension'] = file_extension
         arg['functions'] = functions
-        arg['index'] = str(j + 1)
     generic_main(execution_args)
