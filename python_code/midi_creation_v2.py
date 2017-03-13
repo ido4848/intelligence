@@ -168,11 +168,18 @@ def main():
     file_extension = "mid"
     functions = get_midi_functions()
 
-    data_name = "midi_test_train"
+    data_name = "midi_test"
+    train_name = "midi_test"
     executions_args = []
-    executions_args.append({'iterations': 1, 'freq_stats': 1, 'setup': True, 'data_name': data_name, 'verbose': True})
-    executions_args.append({'iterations': 5, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'verbose': True})
-    executions_args.append({'iterations': 10, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'verbose': True})
+    executions_args.append(
+        {'iterations': 1, 'freq_stats': 1, 'setup': True, 'data_name': data_name, 'train_name': train_name,
+         'verbose': True})
+    executions_args.append(
+        {'iterations': 5, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
+         'verbose': True})
+    executions_args.append(
+        {'iterations': 10, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
+         'verbose': True})
     src.intelligent_logic.generic_type_main(executions_args, home_folder, type_folder, file_extension, functions)
 
 
