@@ -120,7 +120,6 @@ def get_midi_functions():
         return part
 
     def genome_to_item(genome):
-
         random_lst = RandomList(genome.genomeList)
         length = random_lst.rand(LENGTH)
         num_of_parts = random_lst.rand(NUM_OF_PARTS)
@@ -154,7 +153,7 @@ def get_midi_functions():
 def main():
     '''
     home_folder : /home/ido
-    type_folder : Music
+    type_folder : /Music
     file_extension
     functions
     index (auto)
