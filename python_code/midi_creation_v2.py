@@ -180,7 +180,8 @@ def main():
     executions_args.append(
         {'iterations': 10, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
          'verbose': True})
-    src.intelligent_logic.generic_type_main(executions_args, home_folder, type_name, type_folder, file_extension, functions)
+    src.intelligent_logic.generic_type_main(executions_args, home_folder, type_name, type_folder, file_extension,
+                                            functions)
 
 
 if __name__ == "__main__":
