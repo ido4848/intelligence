@@ -149,39 +149,56 @@ def get_midi_functions():
 
 
 def main():
-    '''
-    home_folder : /home/ido
-    type_folder : /Music
-    file_extension
-    functions
-
-    data_name: midi_compcat_beethoven
-    iterations
-    freq_stats
-    setup
-    verbose
-    '''
-
     home_folder = "/home/ido"
     type_folder = "/Music"
     type_name = "music"
     file_extension = "mid"
+    type_params = {
+        'type_folder': type_folder,
+        'type_name': type_name,
+        'file_extension': file_extension
+    }
     functions = get_midi_functions()
-
     data_name = "midi_test"
     train_name = "midi_test"
+    names = {'product_name': data_name, 'data_name': data_name, 'detector_name': data_name,
+             'train_name': train_name}
+
     executions_args = []
     executions_args.append(
-        {'iterations': 1, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
-         'verbose': True})
+        {
+            'home_folder': home_folder,
+
+            'params': {'population_size': 100, 'iterations': 1},
+            'flags': {'setup': False, 'verbose': True},
+            'names': names,
+            'type_params': type_params,
+            'functions': functions
+        })
+
     executions_args.append(
-        {'iterations': 5, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
-         'verbose': True})
+        {
+            'home_folder': home_folder,
+
+            'params': {'population_size': 100, 'iterations': 10},
+            'flags': {'setup': False, 'verbose': True},
+            'names': names,
+            'type_params': type_params,
+            'functions': functions
+        })
+
     executions_args.append(
-        {'iterations': 10, 'freq_stats': 1, 'setup': False, 'data_name': data_name, 'train_name': train_name,
-         'verbose': True})
-    src.intelligent_logic.generic_type_main(executions_args, home_folder, type_name, type_folder, file_extension,
-                                            functions)
+        {
+            'home_folder': home_folder,
+
+            'params': {'population_size': 100, 'iterations': 10},
+            'flags': {'setup': False, 'verbose': True},
+            'names': names,
+            'type_params': type_params,
+            'functions': functions
+        })
+
+    src.intelligent_logic.generic_main(executions_args)
 
 
 if __name__ == "__main__":
@@ -195,4 +212,5 @@ constants? (midi length, instruments number, what instruments)
 info file for each created
 more generic saver?
 crawl the web?
+generic_multiple_main? (shortcut)
 '''
