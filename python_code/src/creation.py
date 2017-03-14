@@ -1,48 +1,37 @@
 from pyevolve import GSimpleGA
 from pyevolve import Selectors
 
+from deap import base, creator, tools, algorithms
+import numpy
+
 
 class Creator(object):
-    def __init__(self, detector, get_genome, genome_to_item, verbose=True):
+    def __init__(self, detector, get_toolbox, genome_to_item, verbose=True):
         self._detector = detector
-        self._get_genome = get_genome
+        self._toolbox = get_toolbox()
         self._genome_to_item = genome_to_item
 
         self._verbose = verbose
 
-    def create(self, iterations, freq_stats=0):
+    def create(self, params):
         def eval_func(raw_genome):
             item = self._genome_to_item(raw_genome)
             pred = self._detector.detect(item)
-            return pred
+            return pred,
 
-        # Enable the pyevolve logging system
-        # pyevolve.logEnable("/dev/null")
+        self._toolbox.register("evaluate", eval_func)
+        self._toolbox.register("mate", tools.cxTwoPoint)
+        self._toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+        self._toolbox.register("select", tools.selTournament, tournsize=3)
 
-        genome = self._get_genome()
-        # The evaluator function (evaluation function)
-        genome.evaluator.set(eval_func)
+        pop = self._toolbox.population(n=params['population_size'])
+        hof = tools.HallOfFame(1)
+        stats = tools.Statistics(lambda ind: ind.fitness.values)
+        stats.register("avg", numpy.mean)
+        stats.register("std", numpy.std)
+        stats.register("min", numpy.min)
+        stats.register("max", numpy.max)
 
-        # Genetic Algorithm Instance
-        ga = GSimpleGA.GSimpleGA(genome)
-
-        # Set the Roulette Wheel selector method, the number of generations and
-        # the termination criteria
-        ga.selector.set(Selectors.GRouletteWheel)
-        ga.setGenerations(iterations)
-        #ga.terminationCriteria.set(GSimpleGA.ConvergenceCriteria)
-
-        # Sets the DB Adapter, the resetDB flag will make the Adapter recreate
-        # the database and erase all data every run, you should use this flag
-        # just in the first time, after the pyevolve.db was created, you can
-        # omit it.
-        # sqlite_adapter = DBAdapters.DBSQLite(identify="ex1", resetDB=True)
-        # ga.setDBAdapter(sqlite_adapter)
-
-        # Do the evolution, with stats dump
-        # frequency of 20 generations
-        ga.evolve(freq_stats=freq_stats)
-
-        # Best individual
-        best = ga.bestIndividual()
-        return best
+        pop, log = algorithms.eaSimple(pop, self._toolbox, cxpb=0.5, mutpb=0.2, ngen=params['iterations'],
+                                       stats=stats, halloffame=hof, verbose=self._verbose)
+        return pop

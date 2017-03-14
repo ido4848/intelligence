@@ -22,7 +22,7 @@ params:
 
 paths:
     positive_folder
-    item_path
+    population_path
     data_path
     detector_path
 
@@ -32,7 +32,7 @@ flags:
 '''
 
 
-def main_logic(functions, params, paths, flags):
+def main_logic(functions, params, paths, flags, names, type_params):
     setup = flags.get('setup', False)
     verbose = flags.get('verbose', False)
 
@@ -72,13 +72,17 @@ def main_logic(functions, params, paths, flags):
     creator = creation.Creator(detector, functions['get_toolbox'], functions['genome_to_item'], verbose=verbose)
     if verbose:
         logger.log("Creator creation has ended.")
-        logger.log("Best item creation has started.")
-    best_item = functions['genome_to_item'](creator.create(params['population_size'], params['iterations']))
+        logger.log("Best population creation has started.")
+    best_population = (creator.create(params))
+    best_items = [functions['genome_to_item'](genome) for genome in best_population]
     if verbose:
-        logger.log("Best item creation has ended.")
-    functions['save_item'](best_item, paths['item_path'])
+        logger.log("Best population creation has ended.")
+    for j, best_item in enumerate(best_items):
+        item_path = "{}/{}_{}.{}".format(paths['product_folder_path'], names['product_name'], str(j + 1),
+                                         type_params['file_extension'])
+        functions['save_item'](best_item, item_path)
     if verbose:
-        logger.log("Best item was saved in {}.".format(paths['item_path']))
+        logger.log("Best population was saved under {}.".format(paths['product_folder_path']))
 
     end_time = time.time()
     if verbose:
@@ -126,7 +130,6 @@ def generic_main(executions_args):
 
         db_file_path = db_folder_path + "/" + detector_name
         detector_file_path = detector_folder_path + "/" + data_name
-        product_file_path = product_folder_path + "/" + product_name + "." + arg['type_params']['file_extension']
 
         create_folder_if_needed(db_folder_path)
         create_folder_if_needed(detector_folder_path)
@@ -134,9 +137,10 @@ def generic_main(executions_args):
 
         paths = {
             'positive_folder': train_folder_path,
-            'item_path': product_file_path,
+            'product_path': product_folder_path,
             'data_path': db_file_path,
-            'detector_path': detector_file_path
+            'detector_path': detector_file_path,
+            'product_folder_path': product_folder_path
         }
 
-        main_logic(arg['functions'], arg['params'], paths, arg['flags'])
+        main_logic(arg['functions'], arg['params'], paths, arg['flags'], arg['names'], arg['type_params'])
