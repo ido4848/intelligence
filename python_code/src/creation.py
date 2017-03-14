@@ -1,14 +1,12 @@
-from pyevolve import GSimpleGA
-from pyevolve import Selectors
+import numpy
+import random
 
 from deap import base, creator, tools, algorithms
-import numpy
 
 
 class Creator(object):
-    def __init__(self, detector, get_toolbox, genome_to_item, verbose=True):
+    def __init__(self, detector, genome_to_item, verbose=True):
         self._detector = detector
-        self._toolbox = get_toolbox()
         self._genome_to_item = genome_to_item
 
         self._verbose = verbose
@@ -19,12 +17,23 @@ class Creator(object):
             pred = self._detector.detect(item)
             return pred,
 
-        self._toolbox.register("evaluate", eval_func)
-        self._toolbox.register("mate", tools.cxTwoPoint)
-        self._toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
-        self._toolbox.register("select", tools.selTournament, tournsize=3)
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+        creator.create("Individual", list, fitness=creator.FitnessMax)
 
-        pop = self._toolbox.population(n=params['population_size'])
+        toolbox = base.Toolbox()
+
+        toolbox.register("attr_float", random.random)
+        toolbox.register("individual", tools.initRepeat, creator.Individual,
+                         toolbox.attr_float, params['genome_size'])
+
+        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+        toolbox.register("evaluate", eval_func)
+        toolbox.register("mate", tools.cxTwoPoint)
+        toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+        toolbox.register("select", tools.selTournament, tournsize=3)
+
+        pop = toolbox.population(n=params['population_size'])
         hof = tools.HallOfFame(1)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", numpy.mean)
@@ -32,6 +41,6 @@ class Creator(object):
         stats.register("min", numpy.min)
         stats.register("max", numpy.max)
 
-        pop, log = algorithms.eaSimple(pop, self._toolbox, cxpb=0.5, mutpb=0.2, ngen=params['iterations'],
+        pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=params['num_of_generations'],
                                        stats=stats, halloffame=hof, verbose=self._verbose)
         return pop

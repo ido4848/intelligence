@@ -69,7 +69,7 @@ def main_logic(functions, params, paths, flags, names, type_params):
         logger.log("Could not get crawled data, as setup is False and there is no saved data.")
         return
 
-    creator = creation.Creator(detector, functions['get_toolbox'], functions['genome_to_item'], verbose=verbose)
+    creator = creation.Creator(detector, functions['genome_to_item'], verbose=verbose)
     if verbose:
         logger.log("Creator creation has ended.")
         logger.log("Best population creation has started.")
