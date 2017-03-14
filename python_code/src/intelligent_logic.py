@@ -25,10 +25,18 @@ paths:
     population_path
     data_path
     detector_path
+    product_foler_path
 
 flags:
     setup
     verbose
+
+names:
+    product_name
+
+type_params:
+    file_extension
+    
 '''
 
 
