@@ -9,7 +9,8 @@ from music21.duration import Duration
 from music21 import instrument
 from music21.volume import Volume
 
-import src.intelligent_logic
+from src.intelligent_logic import generic_main
+from src.genome_value import GenomeValue
 
 
 def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [
@@ -54,39 +55,26 @@ def append_rest(part, duration):
     part.append(Rest(quarterLength=duration))
 
 
-def get_random_part(length, random_lst):
+def get_random_part(length, genome_value):
     part = Part()
-    instrument_index = random_lst.rand({'min': 0, 'max': len(INSTRUMENTS_CLASSES) - 1})
+    instrument_index = genome_value.get({'min': 0, 'max': len(INSTRUMENTS_CLASSES) - 1})
     instrument_class = INSTRUMENTS_CLASSES[instrument_index]
     set_instrument(part, instrument_class())
     for _ in range(length):
-        notePred = random_lst.rand({'min': 0, 'max': 1}, isInt=False)
-        duration = random_lst.rand(DURATION, isInt=False)
-        isNote = notePred > 0.2
-        if isNote:
-            num_of_notes = random_lst.rand(NUM_OF_NOTES)
-            velocity = random_lst.rand(VELOCITY)
+        note_pred = genome_value.get({'min': 0, 'max': 1}, is_int=False)
+        duration = genome_value.get(DURATION, is_int=False)
+        is_chord = note_pred > 0.2
+        if is_chord:
+            num_of_notes = genome_value.get(NUM_OF_NOTES)
+            velocity = genome_value.get(VELOCITY)
             notes = []
             for _ in range(num_of_notes):
-                note = random_lst.rand(PITCH)
+                note = genome_value.get(PITCH)
                 notes.append(note)
             append_chord(part, notes, duration, velocity)
         else:
             append_rest(part, duration)
     return part
-
-
-class RandomList(object):
-    def __init__(self, lst):
-        self.lst = lst
-        self.index = 0
-
-    def rand(self, minMaxDict, isInt=True):
-        val = self.lst[self.index] * (minMaxDict['max'] - minMaxDict['min']) + minMaxDict['min']
-        self.index += 1
-        if isInt:
-            return int(round(val))
-        return val
 
 
 def get_midi_functions():
@@ -101,12 +89,12 @@ def get_midi_functions():
         return flatten(f[0] + f[1])
 
     def genome_to_item(genome):
-        random_lst = RandomList(genome)
-        length = random_lst.rand(LENGTH)
-        num_of_parts = random_lst.rand(NUM_OF_PARTS)
+        genome_value = GenomeValue(genome)
+        length = genome_value.get(LENGTH)
+        num_of_parts = genome_value.get(NUM_OF_PARTS)
         parts = []
         for _ in range(num_of_parts):
-            parts.append(get_random_part(length, random_lst))
+            parts.append(get_random_part(length, genome_value))
 
         stream = Stream(parts)
         return stream
@@ -176,7 +164,7 @@ def main():
             'functions': functions
         })
 
-    src.intelligent_logic.generic_main(executions_args)
+    generic_main(executions_args)
 
 
 if __name__ == "__main__":
@@ -191,5 +179,4 @@ info file for each created
 more generic saver?
 crawl the web?
 generic_multiple_main? (shortcut)
-random list should be part of the lib
 '''
