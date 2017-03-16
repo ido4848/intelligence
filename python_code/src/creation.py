@@ -29,9 +29,9 @@ class Creator(object):
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
         toolbox.register("evaluate", eval_func)
-        toolbox.register("mate", tools.cxTwoPoint)
-        toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
-        toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("mate", tools.cxBlend, alpha=0.1)
+        toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.5, indpb=0.05)
+        toolbox.register("select", tools.selBest)
 
         pop = toolbox.population(n=params['population_size'])
         hof = tools.HallOfFame(1)
