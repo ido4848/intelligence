@@ -125,10 +125,11 @@ def generic_main(executions_args):
         product_name = arg['names']['product_name'] + "_created"
         data_name = arg['names']['data_name'] + "_data"
         detector_name = arg['names']['detector_name'] + "_detector"
+        train_name = arg['names']['train_name'] + "_train"
+
 
         time_path = datetime.datetime.now().strftime("/%y_%m_%d/%H_%M_%S")
-        train_folder_path = arg['home_folder'] + arg['type_params']['type_folder'] + "/train/" + arg['names'][
-            'train_name']
+        train_folder_path = arg['home_folder'] + arg['type_params']['type_folder'] + "/train/" + train_name
 
         db_folder_path = arg['home_folder'] + "/DB/intelligent_data/" + data_name
         detector_folder_path = arg['home_folder'] + "/DB/intelligent_detectors/" + detector_name
