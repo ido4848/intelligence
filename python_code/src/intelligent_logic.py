@@ -25,7 +25,7 @@ paths:
     population_path
     data_path
     detector_path
-    product_foler_path
+    product_folder_path
 
 flags:
     setup
@@ -36,7 +36,7 @@ names:
 
 type_params:
     file_extension
-    
+
 '''
 
 
