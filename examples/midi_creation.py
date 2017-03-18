@@ -10,12 +10,19 @@ from music21.note import Rest
 from music21.stream import Part, Stream
 from music21.volume import Volume
 
+from lsanomaly import LSAnomaly
+
 from utilization.savers.file_saver import FileSaver
+from utilization.loaders.file_loader import FileLoader
 from utilization.savers.timestamp_file_saver import TimestampFileSaver
 from utilization.savers.batch_file_saver import BatchFileSaver
 
-from
+from obtention.obtainers.folder_crawler_obtainer import FolderCrawlerObtainer
 
+from creation.creators.deap_creator import DeapCreator
+
+from execution.executers.obtention_setup_executer import ObtentionSetupExecuter
+from execution.executers.one_class_regression_setup_executer import OneClassRegressionSetupExecuter
 from execution.executers.main_executer import MainExecuter
 from execution.executers.batch_executer import BatchExecuter
 
@@ -113,19 +120,29 @@ def value_list_to_midi(value_list):
 
 def main():
     home_folder = "/home/ido"
+    music_folder = "Music"
+    db_folder = "DB"
+    data_folder = "intelligent_data"
+    regressor_folder = "intelligent_regressor"
+    product_folder = "intelligent_music"
+    train_folder = "intelligent_train"
 
-    music_folder_name = "Music"
-    product_folder_name = "intelligent_music"
-    train_folder_name = "midi_test_train"
-
+    train_name = "midi_test_train"
+    data_name = "midi_test_data"
+    regressor_name = "midi_test_regressor"
     product_name = "midi_test_created"
 
-    midi_file_saver = BatchFileSaver(os.path.join(home_folder, music_folder_name, product_folder_name), product_name,
+    midi_file_saver = BatchFileSaver(os.path.join(home_folder, music_folder, product_name), product_name,
                                      file_saver_class=TimestampFileSaver, file_extension=".mid", save_method=save_midi)
+    train_data_saver = FileSaver(os.path.join(home_folder, db_folder, data_folder, data_name), data_name)
+    regressor_saver = FileSaver(os.path.join(home_folder, db_folder, regressor_folder, regressor_name), regressor_name)
 
+    midi_test_files_obtainer = FolderCrawlerObtainer(load_midi, os.path.join(home_folder, music_folder, train_folder,
+                                                                             train_name))  # TODO: should get a loader as first argument
 
+    regressor = LSAnomaly()
 
-
+    ObtentionSetupExecuter(midi_test_files_obtainer)
 
     home_folder = "/home/ido"
     type_params = {
