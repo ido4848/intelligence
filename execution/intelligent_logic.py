@@ -1,13 +1,13 @@
-import time
 import datetime
 import os
+import time
 
-import crawling
-import creation
-import detection
+from src.obtention.obtainers import folder_crawler_obtainer
+from src.regression import detection
+from src.utilization import saving as saver
+from src.utilization.general_utilities import logging as logger
 
-from util_modules import saving as saver
-from util_modules import logging as logger
+from creation.creators import deap_creator
 
 '''
 functions:
@@ -51,7 +51,7 @@ def main_logic(functions, params, paths, flags, names, type_params):
         logger.log("Starting to perform main logic.")
     detector = None
     if setup:
-        positive_set = crawling.FolderCrawler.crawl(paths['positive_folder'], functions['path_to_item'])
+        positive_set = folder_crawler_obtainer.FolderCrawlerObtainer.crawl(paths['positive_folder'], functions['path_to_item'])
         negative_set = None
         if verbose:
             logger.log("Crawling ended.")
@@ -83,7 +83,7 @@ def main_logic(functions, params, paths, flags, names, type_params):
         logger.log("Could not get crawled data, as setup is False and there is no saved data.")
         return
 
-    creator = creation.Creator(detector, functions['genome_to_item'], verbose=verbose)
+    creator = deap_creator.DeapCreator(detector, functions['genome_to_item'], verbose=verbose)
     if verbose:
         logger.log("Creator creation has ended.")
         logger.log("Best population creation has started.")

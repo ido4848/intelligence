@@ -1,9 +1,10 @@
 import math
 
 
-class GenomeValue(object):
+class ValueList(object):
     def __init__(self, lst):
         self._lst = lst
+        # TODO: need to normalize?
         for j, a in enumerate(self._lst):
             if a < 0:
                 self._lst[j] = a - math.floor(a)

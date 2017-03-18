@@ -1,20 +1,28 @@
 import inspect
+import os
 
 from music21 import features
-from music21.midi import translate
-from music21.stream import Part, Stream
-from music21.chord import Chord
-from music21.note import Note, Rest
-from music21.duration import Duration
 from music21 import instrument
+from music21.chord import Chord
+from music21.duration import Duration
+from music21.midi import translate
+from music21.note import Rest
+from music21.stream import Part, Stream
 from music21.volume import Volume
 
-from src.intelligent_logic import generic_main
-from src.genome_value import GenomeValue
+from utilization.savers.file_saver import FileSaver
+from utilization.savers.timestamp_file_saver import TimestampFileSaver
+from utilization.savers.batch_file_saver import BatchFileSaver
+
+from
+
+from execution.executers.main_executer import MainExecuter
+from execution.executers.batch_executer import BatchExecuter
 
 
 def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [
     l]
+
 
 INSTRUMENTS_CLASSES = []
 for _, instrument_class in instrument.__dict__.iteritems():
@@ -37,7 +45,7 @@ NOTE_SIZE = 1 + 1 + 1 + 1 + NUM_OF_NOTES['max']
 PART_SIZE = 1 + LENGTH['max'] * NOTE_SIZE
 
 # length + num of parts + parts
-GENOME_SIZE = 1 + 1 + NUM_OF_PARTS['max'] * PART_SIZE
+VALUE_LIST_SIZE = 1 + 1 + NUM_OF_PARTS['max'] * PART_SIZE
 
 
 def set_instrument(part, instrument):
@@ -54,21 +62,21 @@ def append_rest(part, duration):
     part.append(Rest(quarterLength=duration))
 
 
-def get_random_part(length, genome_value):
+def get_part(length, list_value):
     part = Part()
-    instrument_index = genome_value.get({'min': 0, 'max': len(INSTRUMENTS_CLASSES) - 1})
+    instrument_index = list_value.get({'min': 0, 'max': len(INSTRUMENTS_CLASSES) - 1})
     instrument_class = INSTRUMENTS_CLASSES[instrument_index]
     set_instrument(part, instrument_class())
     for _ in range(length):
-        note_pred = genome_value.get({'min': 0, 'max': 1}, is_int=False)
-        duration = genome_value.get(DURATION, is_int=False)
+        note_pred = list_value.get({'min': 0, 'max': 1}, is_int=False)
+        duration = list_value.get(DURATION, is_int=False)
         is_chord = note_pred > 0.2
         if is_chord:
-            num_of_notes = genome_value.get(NUM_OF_NOTES)
-            velocity = genome_value.get(VELOCITY)
+            num_of_notes = list_value.get(NUM_OF_NOTES)
+            velocity = list_value.get(VELOCITY)
             notes = []
             for _ in range(num_of_notes):
-                note = genome_value.get(PITCH)
+                note = list_value.get(PITCH)
                 notes.append(note)
             append_chord(part, notes, duration, velocity)
         else:
@@ -76,43 +84,49 @@ def get_random_part(length, genome_value):
     return part
 
 
-def get_midi_functions():
-    # item is music21.stream.Stream
-    functions = {}
+def save_midi(save_path, item):
+    midi_file = translate.streamToMidiFile(item)
+    binfile = open(save_path, 'wb')
+    binfile.write(midi_file.writestr())
+    binfile.close()
 
-    def path_to_item(path):
-        return translate.midiFilePathToStream(path)
 
-    def item_to_features(item):
-        f = features.base.allFeaturesAsList(item)
-        return flatten(f[0] + f[1])
+def load_midi(path):
+    return translate.midiFilePathToStream(path)
 
-    def genome_to_item(genome):
-        genome_value = GenomeValue(genome)
-        length = genome_value.get(LENGTH)
-        num_of_parts = genome_value.get(NUM_OF_PARTS)
-        parts = []
-        for _ in range(num_of_parts):
-            parts.append(get_random_part(length, genome_value))
 
-        stream = Stream(parts)
-        return stream
+def midi_to_features(stream):
+    f = features.base.allFeaturesAsList(stream)
+    return flatten(f[0] + f[1])
 
-    def save_item(item, save_path):
-        midi_file = translate.streamToMidiFile(item)
-        binfile = open(save_path, 'wb')
-        binfile.write(midi_file.writestr())
-        binfile.close()
 
-    functions['path_to_item'] = path_to_item
-    functions['item_to_features'] = item_to_features
-    functions['genome_to_item'] = genome_to_item
-    functions['save_item'] = save_item
+def value_list_to_midi(value_list):
+    length = value_list.get(LENGTH)
+    num_of_parts = value_list.get(NUM_OF_PARTS)
+    parts = []
+    for _ in range(num_of_parts):
+        parts.append(get_part(length, value_list))
 
-    return functions
+    stream = Stream(parts)
+    return stream
 
 
 def main():
+    home_folder = "/home/ido"
+
+    music_folder_name = "Music"
+    product_folder_name = "intelligent_music"
+    train_folder_name = "midi_test_train"
+
+    product_name = "midi_test_created"
+
+    midi_file_saver = BatchFileSaver(os.path.join(home_folder, music_folder_name, product_folder_name), product_name,
+                                     file_saver_class=TimestampFileSaver, file_extension=".mid", save_method=save_midi)
+
+
+
+
+
     home_folder = "/home/ido"
     type_params = {
         'type_folder': "/Music",
@@ -131,7 +145,7 @@ def main():
         {
             'home_folder': home_folder,
 
-            'params': {'population_size': 10, 'num_of_generations': 1, 'genome_size': GENOME_SIZE},
+            'params': {'population_size': 10, 'num_of_generations': 1, 'genome_size': VALUE_LIST_SIZE},
             'flags': {'setup': False, 'verbose': True},
             'names': names,
             'type_params': type_params,
@@ -143,7 +157,7 @@ def main():
         {
             'home_folder': home_folder,
 
-            'params': {'population_size': 100, 'num_of_generations': 10, 'genome_size': GENOME_SIZE},
+            'params': {'population_size': 100, 'num_of_generations': 10, 'genome_size': VALUE_LIST_SIZE},
             'flags': {'setup': False, 'verbose': True},
             'names': names,
             'type_params': type_params,
@@ -155,7 +169,7 @@ def main():
         {
             'home_folder': home_folder,
 
-            'params': {'population_size': 100, 'num_of_generations': 10, 'genome_size': GENOME_SIZE},
+            'params': {'population_size': 100, 'num_of_generations': 10, 'genome_size': VALUE_LIST_SIZE},
             'flags': {'setup': False, 'verbose': True},
             'names': names,
             'type_params': type_params,

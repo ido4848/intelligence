@@ -1,20 +1,24 @@
-import numpy
 import random
 
+import numpy
 from deap import base, creator, tools, algorithms
 
+from utilization.value_lists import ValueList
 
-class Creator(object):
-    def __init__(self, detector, genome_to_item, verbose=True):
-        self._detector = detector
-        self._genome_to_item = genome_to_item
 
+class DeapCreator(object):
+    def __init__(self, trained_regressor, value_list_to_item, config, verbose=True):
+        self._trained_regressor = trained_regressor
+        self._value_list_to_item = value_list_to_item
+
+        self._config = config
         self._verbose = verbose
 
-    def create(self, params):
-        def eval_func(raw_genome):
-            item = self._genome_to_item(raw_genome)
-            pred = self._detector.detect(item)
+    def _create(self):
+        def eval_func(genome_list):
+            value_list = ValueList(genome_list)
+            item = self._value_list_to_item(value_list)
+            pred = self._trained_regressor.predict_proba(item)
             return pred,
 
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -24,7 +28,7 @@ class Creator(object):
 
         toolbox.register("attr_float", random.random)
         toolbox.register("individual", tools.initRepeat, creator.Individual,
-                         toolbox.attr_float, params['genome_size'])
+                         toolbox.attr_float, self._config['genome_size'])
 
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
@@ -33,7 +37,7 @@ class Creator(object):
         toolbox.register("mutate", tools.mutGaussian, mu=0.5, sigma=0.5, indpb=0.05)
         toolbox.register("select", tools.selBest)
 
-        pop = toolbox.population(n=params['population_size'])
+        pop = toolbox.population(n=self._config['population_size'])
         hof = tools.HallOfFame(1)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", numpy.mean)
@@ -41,6 +45,15 @@ class Creator(object):
         stats.register("min", numpy.min)
         stats.register("max", numpy.max)
 
-        pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=params['num_of_generations'],
+        pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=self._config['num_of_generations'],
                                        stats=stats, halloffame=hof, verbose=self._verbose)
         return pop
+
+    def create(self):
+        return self._create()[0]
+
+    def create_many(self, n):
+        many = self._create()
+        while len(many) < n:
+            many += self._create()
+        return many[0:n]
