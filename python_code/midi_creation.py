@@ -16,7 +16,6 @@ from src.genome_value import GenomeValue
 def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [
     l]
 
-
 INSTRUMENTS_CLASSES = []
 for _, instrument_class in instrument.__dict__.iteritems():
     if inspect.isclass(instrument_class):
@@ -179,4 +178,6 @@ info file for each created
 more generic saver?
 crawl the web?
 generic_multiple_main? (shortcut)
+normalize featuers ( x - avg/(max-min))
+
 '''

@@ -1,0 +1,4 @@
+lsanomaly
+numpy
+deap
+shleve

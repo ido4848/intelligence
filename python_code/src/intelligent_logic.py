@@ -19,6 +19,7 @@ functions:
 params:
     population_size
     iterations
+    classifier
 
 paths:
     positive_folder
@@ -28,6 +29,7 @@ paths:
     product_folder_path
 
 flags:
+    one_class_classifier
     setup
     verbose
 
@@ -50,9 +52,13 @@ def main_logic(functions, params, paths, flags, names, type_params):
     detector = None
     if setup:
         positive_set = crawling.FolderCrawler.crawl(paths['positive_folder'], functions['path_to_item'])
+        negative_set = None
         if verbose:
             logger.log("Crawling ended.")
-        detector = detection.Detector(positive_set, None, functions['item_to_features'])
+        if not flags.get("one_class_classifier"):
+            negative_set = []  # TODO update
+        detector = detection.Detector(positive_set, negative_set, functions['item_to_features'],
+                                      clf=params.get('classifier'))
         if verbose:
             logger.log("Detector creation has ended.")
         if 'data_path' in paths.keys():
@@ -126,7 +132,6 @@ def generic_main(executions_args):
         data_name = arg['names']['data_name'] + "_data"
         detector_name = arg['names']['detector_name'] + "_detector"
         train_name = arg['names']['train_name'] + "_train"
-
 
         time_path = datetime.datetime.now().strftime("/%y_%m_%d/%H_%M_%S")
         train_folder_path = arg['home_folder'] + arg['type_params']['type_folder'] + "/train/" + train_name

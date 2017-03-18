@@ -1,42 +1,57 @@
-import numpy as np
-import pickle
 import shelve
 
-from outer_modules.lsanomaly import LSAnomaly
+import numpy as np
+from lsanomaly import LSAnomaly
+
 from util_modules import logging as logger
 
 
 class Detector(object):
-    def __init__(self, positive_set, negative_set, item_to_features, verbose=True, train=True):
+    def __init__(self, positive_set, negative_set, item_to_features, clf=None, verbose=True, train=True):
         self._positive_set = positive_set
         self._negative_set = negative_set
         self._item_to_features = item_to_features
-        if self._negative_set is None:
-            self._clf = LSAnomaly()
+
+        if clf is not None:
+            self._clf = clf
         else:
-            self._clf = None  # TODO: update
+            if self._negative_set is None:
+                self._clf = LSAnomaly()
+            else:
+                self._clf = None  # TODO: update
 
         self._verbose = verbose
         if train:
             self._train()
 
-    # TODO: update for negative set too
-    def _train(self):
-        train_data = []
-        for item in self._positive_set:
+    def _items_to_features_verbose(self, items):
+        if not isinstance(items, list):
+            if self._verbose:
+                logger.log("items {} are not a list".format(items))
+        features = []
+        for item in items:
             try:
-                train_data.append(self._item_to_features(item))
+                features.append(self._item_to_features(item))
             except Exception as e:
                 if self._verbose:
                     logger.log("Could not extract features from item: {}".format(e.message))
+        return features
+
+    # TODO: update for negative set too
+    def _train(self):
+        positive_train_data = self._items_to_features_verbose(self._positive_set)
+        negative_train_data = self._items_to_features_verbose(self._negative_set)
 
         try:
-            self._clf.fit(np.array(train_data))
+            if len(negative_train_data) > 0:
+                self._clf.fit(np.array(positive_train_data), np.array(negative_train_data))
+            else:
+                self._clf.fit(np.array(positive_train_data))
         except Exception as e:
             raise e
 
         if self._verbose:
-            logger.log("Detector was trained using {} items".format(len(train_data)))
+            logger.log("Detector was trained using {} items".format(len(positive_train_data)))
 
     def detect(self, item):
         test_data = self._item_to_features(item)
