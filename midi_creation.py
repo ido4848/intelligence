@@ -1,5 +1,6 @@
 import inspect
 import os
+import random
 
 import numpy as np
 
@@ -170,7 +171,8 @@ def main():
     regressor_loader = FileLoader(
         os.path.join(home_folder, db_folder, regressor_folder, regressor_name, regressor_name))
 
-    midi_file_saver = BatchFileSaver(os.path.join(home_folder, music_folder, product_name), product_name,
+    midi_file_saver = BatchFileSaver(os.path.join(home_folder, music_folder, product_folder, product_name),
+                                     product_name,
                                      file_saver_class=TimestampFileSaver, file_extension=".mid", save_method=save_midi)
     # OBTAINERS
 
@@ -223,7 +225,5 @@ generic_multiple_main? (shortcut)
 normalize featuers ( x - avg/(max-min))
 
 SHOULD BE UNDER EXAMPLES
-
-SETUPExecuter (that checks if setup is needed)
-rename main executer
+better logging!!!!1
 '''
