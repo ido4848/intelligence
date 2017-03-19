@@ -18,17 +18,19 @@ class TryBatchExecuter(object):
                 except Exception as e:
                     if i > index or index == 0:
                         logger.log(
-                            "Stopping execution on index {} of {}, because of error {}".format(i,
-                                                                                                 len(self._executers),
-                                                                                                 traceback.format_exc()),
+                            "Stopping execution on index {} of {}, because of error {}".format(i + 1,
+                                                                                               len(self._executers),
+                                                                                               traceback.format_exc()),
                             who=self.__class__.__name__)
 
                     else:
                         logger.log(
-                            "Restarting execution on index {} of {}, because of error {}".format(i,
-                                                                                                 len(self._executers),
-                                                                                                 traceback.format_exc()),
+                            "Stopping execution on index {} of {}, because of error {}".format(i + 1,
+                                                                                               len(self._executers),
+                                                                                               traceback.format_exc()),
                             who=self.__class__.__name__)
+                        logger.log("Going to start execution on index {} of {}".format(i, len(self._executers)),
+                                   who=self.__class__.__name__)
                         caught = True
                         index -= 1
                         break
