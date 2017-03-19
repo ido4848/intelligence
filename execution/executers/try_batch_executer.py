@@ -6,7 +6,6 @@ class TryBatchExecuter(object):
     def __init__(self, executers):
         self._executers = executers
 
-    # TODO: prevent infinite loops, and -1 index
     def execute(self):
         index = len(self._executers) - 1
         caught = True
@@ -17,13 +16,22 @@ class TryBatchExecuter(object):
                 try:
                     current_executer.execute()
                 except Exception as e:
-                    logger.log(
-                        "Stopping execution on index {} of {}, because of error {}".format(i, len(self._executers),
-                                                                                           traceback.format_exc()),
-                        who=self.__class__.__name__)
-                    caught = True
-                    index -= 1
-                    break
+                    if i > index or index == 0:
+                        logger.log(
+                            "Stopping execution on index {} of {}, because of error {}".format(i,
+                                                                                                 len(self._executers),
+                                                                                                 traceback.format_exc()),
+                            who=self.__class__.__name__)
+
+                    else:
+                        logger.log(
+                            "Restarting execution on index {} of {}, because of error {}".format(i,
+                                                                                                 len(self._executers),
+                                                                                                 traceback.format_exc()),
+                            who=self.__class__.__name__)
+                        caught = True
+                        index -= 1
+                        break
 
         for executer in self._executers:
             executer.execute()

@@ -183,7 +183,7 @@ def main():
     # TRAINED REGRESSORS
 
     regressor = LSAnomaly()
-    ltr = LoadedTrainedRegressor(regressor)
+    ltr = LoadedTrainedRegressor(regressor_loader)
 
     # CREATORS
 

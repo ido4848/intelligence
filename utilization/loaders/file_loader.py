@@ -26,7 +26,7 @@ class FileLoader(object):
 
     def load(self):
         if not os.path.isfile(self._save_path):
-            raise Exception("cannot load from path {}, id does not exist".format(self._save_path))
+            raise Exception("cannot load from path {}, file does not exist".format(self._save_path))
 
         item = self._load_method(self._save_path)
         if self._verbose:
