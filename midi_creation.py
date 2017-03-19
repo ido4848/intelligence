@@ -1,6 +1,8 @@
 import inspect
 import os
 
+import numpy as np
+
 from music21 import features
 from music21 import instrument
 from music21.chord import Chord
@@ -16,15 +18,21 @@ from utilization.savers.file_saver import FileSaver
 from utilization.loaders.file_loader import FileLoader
 from utilization.savers.timestamp_file_saver import TimestampFileSaver
 from utilization.savers.batch_file_saver import BatchFileSaver
+from utilization.general_utilities.caring import apply_carefully
 
 from obtention.obtainers.folder_crawler_obtainer import FolderCrawlerObtainer
+from obtention.obtainers.loaded_data_obtainer import LoadedDataObtainer
+from obtention.obtainers.edit_obtainer import EditObtainer
+
+from regression.trained_regressors.loaded_trained_regressor import LoadedTrainedRegressor
 
 from creation.creators.deap_creator import DeapCreator
 
 from execution.executers.obtention_setup_executer import ObtentionSetupExecuter
-from execution.executers.one_class_regression_setup_executer import OneClassRegressionSetupExecuter
-from execution.executers.main_executer import MainExecuter
+from execution.executers.regression_setup_executer import RegressionSetupExecuter
+from execution.executers.creation_executer import CreationExecuter
 from execution.executers.batch_executer import BatchExecuter
+from execution.executers.try_batch_executer import TryBatchExecuter
 
 
 def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [
@@ -118,83 +126,86 @@ def value_list_to_midi(value_list):
     return stream
 
 
+def midis_to_train_data(midis, verbose=True):
+    feature_lists = apply_carefully(midis, midi_to_features, verbose)
+    train_list = np.array(feature_lists)
+    return train_list,
+
+
 def main():
+    # CONFIG
+
     home_folder = "/home/ido"
     music_folder = "Music"
     db_folder = "DB"
     data_folder = "intelligent_data"
     regressor_folder = "intelligent_regressor"
     product_folder = "intelligent_music"
-    train_folder = "intelligent_train"
+    train_folder = "train"
 
     train_name = "midi_test_train"
     data_name = "midi_test_data"
     regressor_name = "midi_test_regressor"
     product_name = "midi_test_created"
 
+    execution_configs = [
+        {
+            'creation_config':
+                {'num_of_generations': 1, 'population_size': 10, 'genome_size': VALUE_LIST_SIZE},
+            'num_of_products': 10
+        },
+        {
+            'creation_config':
+                {'num_of_generations': 1, 'population_size': 15, 'genome_size': VALUE_LIST_SIZE},
+            'num_of_products': 15
+        }
+    ]
+
+    # SAVERS and LOADERS
+
+    train_data_saver = FileSaver(os.path.join(home_folder, db_folder, data_folder, data_name), data_name)
+    train_data_loader = FileLoader(os.path.join(home_folder, db_folder, data_folder, data_name, data_name))
+
+    regressor_saver = FileSaver(os.path.join(home_folder, db_folder, regressor_folder, regressor_name), regressor_name)
+    regressor_loader = FileLoader(
+        os.path.join(home_folder, db_folder, regressor_folder, regressor_name, regressor_name))
+
     midi_file_saver = BatchFileSaver(os.path.join(home_folder, music_folder, product_name), product_name,
                                      file_saver_class=TimestampFileSaver, file_extension=".mid", save_method=save_midi)
-    train_data_saver = FileSaver(os.path.join(home_folder, db_folder, data_folder, data_name), data_name)
-    regressor_saver = FileSaver(os.path.join(home_folder, db_folder, regressor_folder, regressor_name), regressor_name)
+    # OBTAINERS
 
-    midi_test_files_obtainer = FolderCrawlerObtainer(load_midi, os.path.join(home_folder, music_folder, train_folder,
-                                                                             train_name))  # TODO: should get a loader as first argument
+    midi_train_files_obtainer = FolderCrawlerObtainer(load_midi, os.path.join(home_folder, music_folder, train_folder,
+                                                                              train_name))
+    train_data_obtainer = LoadedDataObtainer(train_data_loader)
+
+    train_args_obtainer = EditObtainer(train_data_obtainer, edit_method=midis_to_train_data)
+
+    # TRAINED REGRESSORS
 
     regressor = LSAnomaly()
+    ltr = LoadedTrainedRegressor(regressor)
 
-    ObtentionSetupExecuter(midi_test_files_obtainer)
+    # CREATORS
 
-    home_folder = "/home/ido"
-    type_params = {
-        'type_folder': "/Music",
-        'type_name': "music",
-        'file_extension': "mid"
-    }
-    names = {'product_name': 'midi_test',
-             'data_name': 'midi_test',
-             'detector_name': 'midi_test',
-             'train_name': 'midi_test'
-             }
-    functions = get_midi_functions()
+    creators = []
+    for j, execution_config in enumerate(execution_configs):
+        execution_config['creator'] = DeapCreator(ltr, value_list_to_midi, execution_config['creation_config'])
+        execution_configs[j] = execution_config
 
-    executions_args = []
-    executions_args.append(
-        {
-            'home_folder': home_folder,
+    # EXECUTERS
 
-            'params': {'population_size': 10, 'num_of_generations': 1, 'genome_size': VALUE_LIST_SIZE},
-            'flags': {'setup': False, 'verbose': True},
-            'names': names,
-            'type_params': type_params,
+    ose = ObtentionSetupExecuter(midi_train_files_obtainer, train_data_saver)
+    rse = RegressionSetupExecuter(regressor, train_args_obtainer, midi_to_features, regressor_saver)
 
-            'functions': functions
-        })
+    creation_executers = [
+        CreationExecuter(execution_config['creator'], midi_file_saver, execution_config['num_of_products'])
+        for execution_config in execution_configs]
 
-    executions_args.append(
-        {
-            'home_folder': home_folder,
+    try_batch_executers = [TryBatchExecuter([ose, rse, ce]) for ce in creation_executers]
 
-            'params': {'population_size': 100, 'num_of_generations': 10, 'genome_size': VALUE_LIST_SIZE},
-            'flags': {'setup': False, 'verbose': True},
-            'names': names,
-            'type_params': type_params,
+    be = BatchExecuter(try_batch_executers)
 
-            'functions': functions
-        })
-
-    executions_args.append(
-        {
-            'home_folder': home_folder,
-
-            'params': {'population_size': 100, 'num_of_generations': 10, 'genome_size': VALUE_LIST_SIZE},
-            'flags': {'setup': False, 'verbose': True},
-            'names': names,
-            'type_params': type_params,
-
-            'functions': functions
-        })
-
-    generic_main(executions_args)
+    be.execute()
 
 
 if __name__ == "__main__":
@@ -211,4 +222,8 @@ crawl the web?
 generic_multiple_main? (shortcut)
 normalize featuers ( x - avg/(max-min))
 
+SHOULD BE UNDER EXAMPLES
+
+SETUPExecuter (that checks if setup is needed)
+rename main executer
 '''

@@ -1,4 +1,4 @@
-from file_saver import FileSaver, shelve_save
+from file_saver import FileSaver, shelve_save, pickle_save
 
 
 class BatchFileSaver(object):

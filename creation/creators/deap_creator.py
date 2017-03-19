@@ -3,7 +3,8 @@ import random
 import numpy
 from deap import base, creator, tools, algorithms
 
-from utilization.value_lists import ValueList
+from utilization.value_lists.value_list import ValueList
+from utilization.general_utilities import logging as logger
 
 
 class DeapCreator(object):
@@ -15,6 +16,9 @@ class DeapCreator(object):
         self._verbose = verbose
 
     def _create(self):
+        if self._verbose:
+            logger.log("creation started with config {}".format(self._config), who=self.__class__.__name__)
+
         def eval_func(genome_list):
             value_list = ValueList(genome_list)
             item = self._value_list_to_item(value_list)
@@ -47,6 +51,9 @@ class DeapCreator(object):
 
         pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=self._config['num_of_generations'],
                                        stats=stats, halloffame=hof, verbose=self._verbose)
+
+        if self._verbose:
+            logger.log("creation finished", who=self.__class__.__name__)
         return pop
 
     def create(self):

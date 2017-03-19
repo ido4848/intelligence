@@ -1,2 +1,9 @@
-def log(message, level=0):
-    print "{}  {}  {}".format("*" * 10, message, "*" * 10)
+import datetime
+
+
+def log(msg, level=0, who=""):
+    if len(who) > 0:
+        msg = "{} | {}".format(who, msg)
+    time_msg = datetime.datetime.now().strftime("%y.%m.%d %H:%M:%S")
+    msg = "{} | {}".format(msg, time_msg)
+    print "{}  {}  {}".format("*" * 3, msg, "*" * 3)
