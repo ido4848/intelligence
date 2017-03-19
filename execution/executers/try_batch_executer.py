@@ -23,7 +23,18 @@ class TryBatchExecuter(object):
                 try:
                     current_executer.execute()
                 except Exception as e:
+                    if self._verbose:
+                        logger.log(
+                            "Stopping execution on index {} of {}: {}, because of error {}".format(i + 1,
+                                                                                                   len(
+                                                                                                       self._executers),
+                                                                                                   current_executer,
+                                                                                                   traceback.format_exc()),
+                            who=self.__class__.__name__)
+
                     if i > index or index == 0:
+                        return
+                    else:
                         if self._verbose:
                             logger.log(
                                 "Stopping execution on index {} of {}: {}, because of error {}".format(i + 1,
@@ -32,19 +43,9 @@ class TryBatchExecuter(object):
                                                                                                        current_executer,
                                                                                                        traceback.format_exc()),
                                 who=self.__class__.__name__)
-
-                        else:
-                            if self._verbose:
-                                logger.log(
-                                    "Stopping execution on index {} of {}: {}, because of error {}".format(i + 1,
-                                                                                                           len(
-                                                                                                               self._executers),
-                                                                                                           current_executer,
-                                                                                                           traceback.format_exc()),
-                                    who=self.__class__.__name__)
-                                logger.log("Starting execution on index {} of {}: {}".format(i, len(self._executers),
-                                                                                             self._executers[i - 1]),
-                                           who=self.__class__.__name__)
-                            caught = True
-                            index -= 1
-                            break
+                            logger.log("Starting execution on index {} of {}: {}".format(i, len(self._executers),
+                                                                                         self._executers[i - 1]),
+                                       who=self.__class__.__name__)
+                        caught = True
+                        index -= 1
+                        break
