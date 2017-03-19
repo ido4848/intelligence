@@ -52,6 +52,8 @@ class DeapCreator(object):
         pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=self._config['num_of_generations'],
                                        stats=stats, halloffame=hof, verbose=self._verbose)
 
+        pop = [self._value_list_to_item(ValueList(ind)) for ind in pop]
+
         if self._verbose:
             logger.log("creation finished", who=self.__class__.__name__)
         return pop
