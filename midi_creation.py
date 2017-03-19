@@ -112,8 +112,11 @@ def load_midi(path):
 
 
 def midi_to_features(stream):
-    f = features.base.allFeaturesAsList(stream)
-    return flatten(f[0] + f[1])
+    # f = features.base.allFeaturesAsList(stream)
+    # return flatten(f[0] + f[1])
+
+    # mock
+    return [random.random() + i for i in range(100)]
 
 
 def value_list_to_midi(value_list):
