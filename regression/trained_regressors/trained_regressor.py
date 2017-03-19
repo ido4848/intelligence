@@ -11,8 +11,8 @@ class TrainedRegresor(object):
 
     def predict_proba(self, item):
         feature_list = self._item_to_feature_list(item)
-        prediction = self._regressor.predict_proba(np.array(feature_list))
-        if isinstance(prediction, list):
+        prediction = self._regressor.predict_proba(np.array([feature_list]))[0]
+        try:
             return prediction[0]
-        else:
+        except:
             return prediction
