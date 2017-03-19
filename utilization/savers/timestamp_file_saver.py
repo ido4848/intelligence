@@ -12,7 +12,7 @@ class TimestampFileSaver(object):
         self._file_extension = file_extension
 
     def save(self, py_object):
-        time_path = datetime.datetime.now().strftime("/%y_%m_%d/%H_%M_%S")
+        time_path = datetime.datetime.now().strftime("%y_%m_%d/%H_%M_%S")
         fs = FileSaver(os.path.join(self._folder_path, time_path), self._file_path, self._file_extension,
                        self._save_method)
         return fs.save(py_object)
