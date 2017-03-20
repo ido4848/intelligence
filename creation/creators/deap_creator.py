@@ -4,7 +4,7 @@ import numpy
 from deap import base, creator, tools, algorithms
 
 from utilization.value_lists.value_list import ValueList
-from utilization.general_utilities import logging as logger
+from utilization.general_utilities.loggers.logger import Logger, LOG_LEVELS
 
 
 class DeapCreator(object):
@@ -13,7 +13,7 @@ class DeapCreator(object):
         self._value_list_to_item = value_list_to_item
 
         self._config = config
-        self._verbose = verbose
+                self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def _create(self):
         if self._verbose:

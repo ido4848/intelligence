@@ -2,7 +2,7 @@ import os
 import shelve
 import cPickle
 
-from utilization.general_utilities import logging as logger
+from utilization.general_utilities.loggers.logger import Logger, LOG_LEVELS
 
 
 def shelve_save(path, py_object):
@@ -30,10 +30,10 @@ class FileSaver(object):
         self._file_extension = file_extension
         self._full_path = os.path.join(self._folder_path, self._file_path + self._file_extension)
 
-        self._verbose = verbose
+        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def save(self, py_object):
+        self._logger.log("Save {} to {} was started.".format(py_object, self._full_path))
         create_folder_if_needed(self._folder_path)
         self._save_method(self._full_path, py_object)
-        if self._verbose:
-            logger.log("{} was saved to {}".format(py_object, self._full_path), who=self.__class__.__name__)
+        self._logger.log("Save {} to {} was finished.".format(py_object, self._full_path))

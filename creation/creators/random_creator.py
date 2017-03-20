@@ -5,7 +5,7 @@ class RandomCreator(object):
     def __init__(self, value_list_to_item, verbose=True):
         self._value_list_to_item = value_list_to_item
 
-        self._verbose = verbose
+                self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def create(self):
         value_list = RandomValueList()

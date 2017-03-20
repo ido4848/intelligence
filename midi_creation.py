@@ -111,7 +111,7 @@ def load_midi(path):
     return translate.midiFilePathToStream(path)
 
 
-def midi_to_features(stream):
+def midi_to_feature_list(stream):
     # f = features.base.allFeaturesAsList(stream)
     # return flatten(f[0] + f[1])
 
@@ -131,7 +131,7 @@ def value_list_to_midi(value_list):
 
 
 def midis_to_train_data(midis, verbose=True):
-    feature_lists = apply_carefully(midis, midi_to_features, verbose)
+    feature_lists = apply_carefully(midis, midi_to_feature_list, verbose)
     train_list = np.array(feature_lists)
     return train_list,
 
@@ -200,7 +200,7 @@ def main():
     # EXECUTERS
 
     ose = ObtentionSetupExecuter(midi_train_files_obtainer, train_data_saver)
-    rse = RegressionSetupExecuter(regressor, train_args_obtainer, midi_to_features, regressor_saver)
+    rse = RegressionSetupExecuter(regressor, train_args_obtainer, midi_to_feature_list, regressor_saver)
 
     creation_executers = [
         CreationExecuter(execution_config['creator'], midi_file_saver, execution_config['num_of_products'])
@@ -228,5 +228,5 @@ generic_multiple_main? (shortcut)
 normalize featuers ( x - avg/(max-min))
 
 SHOULD BE UNDER EXAMPLES
-better logging!!!!1
+better loggers!!!!1
 '''
