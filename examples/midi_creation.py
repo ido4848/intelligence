@@ -4,7 +4,7 @@ import random
 
 import numpy as np
 
-from music21 import features
+from lsanomaly import LSAnomaly
 from music21 import instrument
 from music21.chord import Chord
 from music21.duration import Duration
@@ -12,28 +12,28 @@ from music21.midi import translate
 from music21.note import Rest
 from music21.stream import Part, Stream
 from music21.volume import Volume
+from music21 import features
 
-from lsanomaly import LSAnomaly
+from intelligent_creation.utilization.general_utilities.caring import apply_carefully
+from intelligent_creation.utilization.loaders.file_loader import FileLoader
+from intelligent_creation.utilization.savers.batch_file_saver import BatchFileSaver
+from intelligent_creation.utilization.savers.timestamp_file_saver import TimestampFileSaver
 
-from utilization.savers.file_saver import FileSaver
-from utilization.loaders.file_loader import FileLoader
-from utilization.savers.timestamp_file_saver import TimestampFileSaver
-from utilization.savers.batch_file_saver import BatchFileSaver
-from utilization.general_utilities.caring import apply_carefully
+from intelligent_creation.obtention.obtainers.edit_obtainer import EditObtainer
+from intelligent_creation.obtention.obtainers.folder_crawler_obtainer import FolderCrawlerObtainer
+from intelligent_creation.obtention.obtainers.loaded_data_obtainer import LoadedDataObtainer
 
-from obtention.obtainers.folder_crawler_obtainer import FolderCrawlerObtainer
-from obtention.obtainers.loaded_data_obtainer import LoadedDataObtainer
-from obtention.obtainers.edit_obtainer import EditObtainer
+from intelligent_creation.regression.trained_regressors.loaded_trained_regressor import LoadedTrainedRegressor
 
-from regression.trained_regressors.loaded_trained_regressor import LoadedTrainedRegressor
+from intelligent_creation.creation.creators.deap_creator import DeapCreator
 
-from creation.creators.deap_creator import DeapCreator
+from intelligent_creation.execution.executers.batch_executer import BatchExecuter
+from intelligent_creation.execution.executers.creation_executer import CreationExecuter
+from intelligent_creation.execution.executers.obtention_setup_executer import ObtentionSetupExecuter
+from intelligent_creation.execution.executers.regression_setup_executer import RegressionSetupExecuter
+from intelligent_creation.execution.executers.try_batch_executer import TryBatchExecuter
 
-from execution.executers.obtention_setup_executer import ObtentionSetupExecuter
-from execution.executers.regression_setup_executer import RegressionSetupExecuter
-from execution.executers.creation_executer import CreationExecuter
-from execution.executers.batch_executer import BatchExecuter
-from execution.executers.try_batch_executer import TryBatchExecuter
+from intelligent_creation.utilization.savers.file_saver import FileSaver
 
 
 def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [
@@ -112,10 +112,10 @@ def load_midi(path):
 
 
 def midi_to_feature_list(stream):
-    # f = features.base.allFeaturesAsList(stream)
-    # return flatten(f[0] + f[1])
+    f = features.base.allFeaturesAsList(stream)
+    return flatten(f[0] + f[1])
 
-    # mock
+    mock
     return [random.random() + i for i in range(100)]
 
 
@@ -227,6 +227,6 @@ crawl the web?
 generic_multiple_main? (shortcut)
 normalize featuers ( x - avg/(max-min))
 
-SHOULD BE UNDER EXAMPLES
 better loggers!!!!1
+tfrecords?
 '''

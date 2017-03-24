@@ -1,8 +1,8 @@
+import cPickle
 import os
 import shelve
-import cPickle
 
-from utilization.general_utilities.loggers.logger import Logger, LOG_LEVELS
+from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
 
 
 def shelve_save(path, py_object):

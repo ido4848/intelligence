@@ -1,6 +1,6 @@
 import numpy as np
 
-from utilization.general_utilities.loggers.logger import Logger, LOG_LEVELS
+from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
 
 
 class TrainedRegresor(object):

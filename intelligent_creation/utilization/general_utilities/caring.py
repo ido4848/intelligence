@@ -1,4 +1,4 @@
-import utilization.general_utilities.logging as logger
+from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
 
 
 def apply_carefully(items, func, verbose=True):

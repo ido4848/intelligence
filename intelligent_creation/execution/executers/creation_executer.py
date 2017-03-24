@@ -1,4 +1,4 @@
-from utilization.general_utilities.loggers.logger import Logger, LOG_LEVELS
+from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
 
 
 class CreationExecuter(object):

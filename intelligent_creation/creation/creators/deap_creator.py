@@ -3,8 +3,8 @@ import random
 import numpy
 from deap import base, creator, tools, algorithms
 
-from utilization.value_lists.value_list import ValueList
-from utilization.general_utilities.loggers.logger import Logger, LOG_LEVELS
+from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
+from intelligent_creation.utilization.value_lists.value_list import ValueList
 
 
 class DeapCreator(object):
@@ -13,11 +13,11 @@ class DeapCreator(object):
         self._value_list_to_item = value_list_to_item
 
         self._config = config
-                self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._verbose = verbose
+        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def _create(self):
-        if self._verbose:
-            logger.log("creation started with config {}".format(self._config), who=self.__class__.__name__)
+        self._logger.log("creation started with config {}".format(self._config))
 
         def eval_func(genome_list):
             value_list = ValueList(genome_list)
@@ -54,8 +54,7 @@ class DeapCreator(object):
 
         pop = [self._value_list_to_item(ValueList(ind)) for ind in pop]
 
-        if self._verbose:
-            logger.log("creation finished", who=self.__class__.__name__)
+        self._logger.log("creation finished")
         return pop
 
     def create(self):

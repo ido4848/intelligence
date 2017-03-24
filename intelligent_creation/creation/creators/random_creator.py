@@ -1,4 +1,4 @@
-from utilization.value_lists import RandomValueList
+from intelligent_creation.utilization.value_lists import RandomValueList
 
 
 class RandomCreator(object):
