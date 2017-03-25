@@ -7,6 +7,7 @@ from intelligent_creation.utilization.general_utilities.loggers.logger import Lo
 from intelligent_creation.utilization.value_lists.value_list import ValueList
 from intelligent_creation.utilization.general_utilities.caring import str_preview
 
+
 class DeapCreator(object):
     def __init__(self, trained_regressor, value_list_to_item, config, verbose=True):
         self._trained_regressor = trained_regressor
