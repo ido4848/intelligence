@@ -1,11 +1,12 @@
-from intelligent_creation.utilization.value_lists import RandomValueList
+from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
+from intelligent_creation.utilization.value_lists.random_value_list import RandomValueList
 
 
 class RandomCreator(object):
     def __init__(self, value_list_to_item, verbose=True):
         self._value_list_to_item = value_list_to_item
 
-                self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def create(self):
         value_list = RandomValueList()

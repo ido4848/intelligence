@@ -1,5 +1,6 @@
 import inspect
 import os
+import sys
 import random
 
 import numpy as np
@@ -103,7 +104,12 @@ def get_part(length, list_value):
 def save_midi(save_path, item):
     midi_file = translate.streamToMidiFile(item)
     binfile = open(save_path, 'wb')
-    binfile.write(midi_file.writestr())
+    # trick for getting music21 shut up
+    _stderr = sys.stderr
+    with open(os.devnull, 'w') as f:
+        sys.stderr = f
+        binfile.write(midi_file.writestr())
+    sys.stderr = _stderr
     binfile.close()
 
 
@@ -115,8 +121,8 @@ def midi_to_feature_list(stream):
     f = features.base.allFeaturesAsList(stream)
     return flatten(f[0] + f[1])
 
-    mock
-    return [random.random() + i for i in range(100)]
+    # mock
+    # return [random.random() + i for i in range(100)]
 
 
 def value_list_to_midi(value_list):
