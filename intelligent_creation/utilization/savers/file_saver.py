@@ -3,6 +3,7 @@ import os
 import shelve
 
 from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
+from intelligent_creation.utilization.general_utilities.caring import str_preview
 
 
 def shelve_save(path, py_object):
@@ -33,7 +34,7 @@ class FileSaver(object):
         self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def save(self, py_object):
-        self._logger.log("Save to {} was started.".format(self._full_path))
+        self._logger.log("Save to {} was started.".format(str_preview(self._full_path)))
         create_folder_if_needed(self._folder_path)
         self._save_method(self._full_path, py_object)
-        self._logger.log("Save {} to {} was finished.".format(py_object, self._full_path))
+        self._logger.log("Save {} to {} was finished.".format(str_preview(py_object), str_preview(self._full_path)))

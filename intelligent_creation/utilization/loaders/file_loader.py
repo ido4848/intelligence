@@ -3,7 +3,7 @@ import os
 import shelve
 
 from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
-
+from intelligent_creation.utilization.general_utilities.caring import str_preview
 
 def shelve_load(path):
     db = shelve.open(path)
@@ -25,10 +25,10 @@ class FileLoader(object):
         self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def load(self):
-        self._logger.log("Load from {} was started.".format(self._save_path))
+        self._logger.log("Load from {} was started.".format(str_preview(self._save_path)))
         if not os.path.isfile(self._save_path):
             raise Exception("cannot load from path {}, file does not exist".format(self._save_path))
 
         item = self._load_method(self._save_path)
-        self._logger.log("Load {} from {} was finished".format(item, self._save_path))
+        self._logger.log("Load {} from {} was finished".format(str_preview(str(item)), str_preview(self._save_path)))
         return item

@@ -5,7 +5,7 @@ from deap import base, creator, tools, algorithms
 
 from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
 from intelligent_creation.utilization.value_lists.value_list import ValueList
-
+from intelligent_creation.utilization.general_utilities.caring import str_preview
 
 class DeapCreator(object):
     def __init__(self, trained_regressor, value_list_to_item, config, verbose=True):
@@ -17,7 +17,7 @@ class DeapCreator(object):
         self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
 
     def _create(self):
-        self._logger.log("creation started with config {}".format(self._config))
+        self._logger.log("creation started with config {}".format(str_preview(self._config)))
 
         def eval_func(genome_list):
             value_list = ValueList(genome_list)

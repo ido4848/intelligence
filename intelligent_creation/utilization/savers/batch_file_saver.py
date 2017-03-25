@@ -13,6 +13,6 @@ class BatchFileSaver(object):
 
     def save(self, py_object):
         fs = self._file_saver_class(self._folder_path, self._file_path + "_" + str(self._index), self._file_extension,
-                                    self._save_method)
+                                    self._save_method, verbose=False)
         fs.save(py_object)
         self._index += 1
