@@ -1,3 +1,5 @@
+# A generic platform for artificial intelligence
+
 # music-detection
 
 possible algorithms:
