@@ -107,6 +107,10 @@ if __name__ == "__main__":
 
 '''
 TODO:
+
+GANS?
+LSTM?
+
 split big midis (smart split?)
 create small midis
 constants? (midi length, instruments number, what instruments)
