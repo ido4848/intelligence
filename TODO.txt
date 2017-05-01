@@ -1,4 +1,5 @@
 better logging
+better importing
 
 multiple class clf
 
@@ -8,6 +9,7 @@ crawl the web?
 
 look for TODOS
 
+creation -> generation?
 
 _ideas:
 
