@@ -1,5 +1,5 @@
-from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
-from intelligent_creation.utilization.value_lists.random_value_list import RandomValueList
+from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.value_lists.random_value_list import RandomValueList
 
 
 class RandomCreator(object):

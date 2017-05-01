@@ -3,9 +3,9 @@ import random
 import numpy
 from deap import base, creator, tools, algorithms
 
-from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
-from intelligent_creation.utilization.value_lists.value_list import ValueList
-from intelligent_creation.utilization.general_utilities.caring import str_preview
+from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.value_lists.value_list import ValueList
+from intelligence.utilization.general_utilities.caring import str_preview
 
 
 class DeapCreator(object):

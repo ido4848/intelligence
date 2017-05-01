@@ -2,8 +2,8 @@ import cPickle
 import os
 import shelve
 
-from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
-from intelligent_creation.utilization.general_utilities.caring import str_preview
+from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.caring import str_preview
 
 
 def shelve_save(path, py_object):

@@ -1,6 +1,6 @@
 import os
 
-from intelligent_creation.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.loggers.logger import Logger
 
 '''
 TODO:

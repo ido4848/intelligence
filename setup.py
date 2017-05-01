@@ -1,12 +1,12 @@
 from setuptools import setup
 from setuptools import find_packages
 
-setup(name='intelligent-creation',
+setup(name='intelligence',
       version='0.1',
-      description='Intelligent creation for python',
+      description='Intelligence for python',
       author='Ido Aizenbud',
       author_email='ido.aizenbud@gmail.com',
-      url='https://github.com/ido4848/intelligent-creation',
+      url='https://github.com/ido4848/intelligence',
       # download_url='https://github.com/fchollet/keras/tarball/2.0.2',
       # license='MIT',
       # install_requires=['theano', 'pyyaml', 'six'],
