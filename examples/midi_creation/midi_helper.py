@@ -12,6 +12,7 @@ from music21.volume import Volume
 from music21 import features
 
 from intelligence.utilization.general_utilities.caring import apply_carefully
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 
 
 def flatten(l): return flatten(l[0]) + (flatten(l[1:]) if len(l) > 1 else []) if type(l) is list else [
@@ -110,7 +111,7 @@ def value_list_to_midi(value_list):
     return stream
 
 
-def midis_to_train_data(midis, verbose=True):
-    feature_lists = apply_carefully(midis, midi_to_feature_list, verbose)
+def midis_to_train_data(midis, logger=ConsoleLogger(verbose=True)):
+    feature_lists = apply_carefully(midis, midi_to_feature_list, logger)
     train_list = np.array(feature_lists)
     return train_list,
