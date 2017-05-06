@@ -16,7 +16,6 @@ class DeapCreator(object):
         self._config = config
 
         self._logger = logger
-        self._verbose = self._logger._verbose  # @todo: remove
 
     def _create(self):
         self._logger.log("creation started with config {}".format(str_preview(self._config)))
@@ -51,8 +50,16 @@ class DeapCreator(object):
         stats.register("min", numpy.min)
         stats.register("max", numpy.max)
 
+        is_console_logger = False
+        if isinstance(self._logger, ConsoleLogger):
+            is_console_logger = True
+
         pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=self._config['num_of_generations'],
-                                       stats=stats, halloffame=hof, verbose=self._verbose)  # todo: get log to logger!!
+                                       stats=stats, halloffame=hof, verbose=is_console_logger)
+
+        if not is_console_logger:
+            # better way (during iterations)
+            self._logger.info("Logbook was: {}".format(log))
 
         pop = [self._value_list_to_item(ValueList(ind)) for ind in pop]
 
