@@ -39,10 +39,11 @@ def main(log_file_path=""):
     product_folder = "intelligent_music"
     train_folder = "train"
 
-    train_name = "midi_test_train"
-    data_name = "midi_test_data"
-    regressor_name = "midi_test_regressor"
-    product_name = "midi_test_created"
+    name = "test"
+    train_name = "midi_{}_train".format(name)
+    data_name = "midi_{}_data".format(name)
+    regressor_name = "midi_{}_regressor".format(name)
+    product_name = "midi_{}_created".format(name)
 
     execution_configs = [
         {
