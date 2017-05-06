@@ -1,11 +1,6 @@
 import datetime
 import termcolor
-
-LOG_LEVELS = {
-    "info": "info",
-    "error": "error",
-    "fatal": "fatal"
-}
+from logging import LOG_LEVELS
 
 LOG_LEVELS_COLORS = {
     "info": "info",
@@ -39,3 +34,4 @@ class Logger(object):
         msg = "{} | {} | {}".format(msg, level, time_msg)
 
         print self.color_text_by_level("{}  {}  {}".format("*" * 3, msg, "*" * 3), level)
+
