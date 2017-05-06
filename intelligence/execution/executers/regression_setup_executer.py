@@ -1,4 +1,4 @@
-from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 
 '''
 
@@ -7,20 +7,20 @@ from intelligence.utilization.general_utilities.loggers.logger import Logger
 
 '''
 
-
 '''
 TODO: should not get both item_to_feature_list and train_args_obtainer
 something like item_to_feature_list and data_obtainer (generic data obtainer...)
 '''
 
+
 class RegressionSetupExecuter(object):
-    def __init__(self, regressor, train_args_obtainer, item_to_feature_list, saver, verbose=True):
+    def __init__(self, regressor, train_args_obtainer, item_to_feature_list, saver, logger=ConsoleLogger(verbose=True)):
         self._regressor = regressor
         self._train_args_obtainer = train_args_obtainer
         self._saver = saver
         self._item_to_feature_list = item_to_feature_list
 
-        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._logger = logger
 
     def _train(self):
         self._logger.log("Train was started")

@@ -1,6 +1,6 @@
 import os
 
-from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 
 '''
 TODO:
@@ -10,9 +10,9 @@ a generic loaderObtainer, that gets loader as input
 
 
 class FolderCrawlerObtainer(object):
-    def __init__(self, path_to_item, folder, verbose=True):
+    def __init__(self, path_to_item, folder, logger=ConsoleLogger(verbose=True)):
         self._path_to_item = path_to_item
-        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._logger = logger
         self._folder = folder
 
     def _crawl(self, folder):

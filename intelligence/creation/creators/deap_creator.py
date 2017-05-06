@@ -3,19 +3,20 @@ import random
 import numpy
 from deap import base, creator, tools, algorithms
 
-from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 from intelligence.utilization.value_lists.value_list import ValueList
 from intelligence.utilization.general_utilities.caring import str_preview
 
 
 class DeapCreator(object):
-    def __init__(self, trained_regressor, value_list_to_item, config, verbose=True):
+    def __init__(self, trained_regressor, value_list_to_item, config, logger=ConsoleLogger(verbose=True)):
         self._trained_regressor = trained_regressor
         self._value_list_to_item = value_list_to_item
 
         self._config = config
-        self._verbose = verbose
-        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+
+        self._logger = logger
+        self._verbose = self._logger._verbose  # @todo: remove
 
     def _create(self):
         self._logger.log("creation started with config {}".format(str_preview(self._config)))
@@ -51,7 +52,7 @@ class DeapCreator(object):
         stats.register("max", numpy.max)
 
         pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=self._config['num_of_generations'],
-                                       stats=stats, halloffame=hof, verbose=self._verbose)
+                                       stats=stats, halloffame=hof, verbose=self._verbose)  # todo: get log to logger!!
 
         pop = [self._value_list_to_item(ValueList(ind)) for ind in pop]
 

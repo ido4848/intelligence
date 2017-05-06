@@ -1,16 +1,14 @@
-from intelligence.utilization.general_utilities.loggers.logger import Logger
-
-global_logger = Logger(verbose=True)
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 
 
-def apply_carefully(items, func, verbose=True):
+def apply_carefully(items, func, logger=ConsoleLogger(verbose=True)):
     products = []
 
     for item in items:
         try:
             products.append(func(item))
         except Exception as e:
-            global_logger.log("Could not apply {} on {} with error {}".format(func, item, e))
+            logger.log("Could not apply {} on {} with error {}".format(func, item, e))
 
     return products
 

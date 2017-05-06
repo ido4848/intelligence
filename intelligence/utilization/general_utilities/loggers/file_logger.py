@@ -1,29 +1,13 @@
 import datetime
-import termcolor
 from logging import LOG_LEVELS
-
-LOG_LEVELS_COLORS = {
-    "info": "info",
-    "error": "error",
-    "fatal": "fatal"
-}
 
 
 # TODO: better
 
-class ConsoleLogger(object):
-    def __init__(self, verbose=True):
+class FileLogger(object):
+    def __init__(self, file_path, verbose=True):
+        self._file_path = file_path
         self._verbose = verbose
-
-    def color_text_by_level(self, text, level):
-        if level == LOG_LEVELS["info"]:
-            return text
-
-        if level == LOG_LEVELS["error"]:
-            return termcolor.colored(text, 'red')
-
-        if level == LOG_LEVELS["fatal"]:
-            return termcolor.colored(text, 'red', attrs=['reverse', 'blink'])
 
     def log(self, msg, who="", level=LOG_LEVELS["info"]):
         if not self._verbose:
@@ -32,8 +16,8 @@ class ConsoleLogger(object):
             msg = "{} | {}".format(who, msg)
         time_msg = datetime.datetime.now().strftime("%y.%m.%d %H:%M:%S")
         msg = "{} | {} | {}".format(msg, level, time_msg)
-
-        print self.color_text_by_level("{}  {}  {}".format("*" * 3, msg, "*" * 3), level)
+        with open(self._file_path, "ab") as f:
+            f.write("{}  {}  {}\n".format("*" * 3, msg, "*" * 3))
 
     def info(self, msg):
         self.log(msg, LOG_LEVELS["info"])

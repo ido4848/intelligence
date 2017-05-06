@@ -2,7 +2,7 @@ import cPickle
 import os
 import shelve
 
-from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 from intelligence.utilization.general_utilities.caring import str_preview
 
 def shelve_load(path):
@@ -18,11 +18,11 @@ def pickle_load(path):
 
 
 class FileLoader(object):
-    def __init__(self, save_path, load_method=shelve_load, verbose=True):
+    def __init__(self, save_path, load_method=shelve_load, logger=ConsoleLogger(verbose=True)):
         self._save_path = save_path
         self._load_method = load_method
 
-        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._logger = logger
 
     def load(self):
         self._logger.log("Load from {} was started.".format(str_preview(self._save_path)))

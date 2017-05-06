@@ -1,13 +1,13 @@
 import numpy as np
 
-from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 
 
 class TrainedRegresor(object):
-    def __init__(self, regressor, item_to_feature_list, verbose=True):
+    def __init__(self, regressor, item_to_feature_list, logger=ConsoleLogger(verbose=True)):
         self._regressor = regressor
         self._item_to_feature_list = item_to_feature_list
-        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._logger = logger
 
     def predict_proba(self, item):
         feature_list = self._item_to_feature_list(item)

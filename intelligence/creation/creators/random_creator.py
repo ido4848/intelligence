@@ -1,12 +1,12 @@
-from intelligence.utilization.general_utilities.loggers.logger import Logger
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 from intelligence.utilization.value_lists.random_value_list import RandomValueList
 
 
 class RandomCreator(object):
-    def __init__(self, value_list_to_item, verbose=True):
+    def __init__(self, value_list_to_item, logger=ConsoleLogger(verbose=True)):
         self._value_list_to_item = value_list_to_item
 
-        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._logger = logger
 
     def create(self):
         value_list = RandomValueList()

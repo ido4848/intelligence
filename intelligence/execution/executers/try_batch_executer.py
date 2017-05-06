@@ -1,14 +1,14 @@
 import traceback
 
-from intelligence.utilization.general_utilities.loggers.logger import Logger, LOG_LEVELS
+from intelligence.utilization.general_utilities.loggers.console_logger import ConsoleLogger
 
 
 # TODO: less code duplication
 
 class TryBatchExecuter(object):
-    def __init__(self, executers, verbose=True):
+    def __init__(self, executers, logger=ConsoleLogger(verbose=True)):
         self._executers = executers
-        self._logger = Logger(who=self.__class__.__name__, verbose=verbose)
+        self._logger = logger
 
     def execute(self):
         index = len(self._executers) - 1
